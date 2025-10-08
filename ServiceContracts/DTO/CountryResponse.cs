@@ -17,16 +17,16 @@ namespace ServiceContracts.DTO
                 return false;
             }
 
-            CountryResponse other = obj as CountryResponse;
+            CountryResponse? other = obj as CountryResponse;
 
-            return this.CountryId == other.CountryId
-                && this.CountryName == other.CountryName;
+            return this.CountryId == other!.CountryId
+                && this.CountryName == other!.CountryName;
         }
 
         public override int GetHashCode()
         {
-            return CountryId.GetHashCode() 
-                & CountryName.GetHashCode();
+            return CountryId!.GetHashCode() 
+                & CountryName!.GetHashCode();
         }
     }
 

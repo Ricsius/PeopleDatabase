@@ -1,4 +1,5 @@
 ﻿using Entities;
+using System.Text;
 
 namespace ServiceContracts.DTO
 {
@@ -17,6 +18,24 @@ namespace ServiceContracts.DTO
         public string? CountryName { get; set; }
         public string? Address { get; set; }
         public bool ReceiveNewsLetters { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine($"Id: {PersonId}");
+            sb.AppendLine($"Name: {Name}");
+            sb.AppendLine($"Email: {Email}");
+            sb.AppendLine($"Date of Birth: {DateOfBirth.ToString("yyyy-MM-dd")}");
+            sb.AppendLine($"Age: {Age}");
+            sb.AppendLine($"Gender: {Gender}");
+            sb.AppendLine($"CountryId: {CountryId}");
+            sb.AppendLine($"CountryName: {CountryName}");
+            sb.AppendLine($"Address: {Address}");
+            sb.AppendLine($"Receive News Letters: {ReceiveNewsLetters}");
+
+            return sb.ToString();
+        }
 
         public override bool Equals(object? obj)
         {

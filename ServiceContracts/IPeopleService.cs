@@ -1,5 +1,4 @@
 ﻿using ServiceContracts.DTO;
-using System.Collections.Generic;
 
 namespace ServiceContracts
 {
@@ -17,5 +16,20 @@ namespace ServiceContracts
         /// </summary>
         /// <returns>Returns an IEnumerable of PersonResponse type</returns>
         IEnumerable<PersonResponse> GetAllPersons();
+
+        /// <summary>
+        /// Returns a person object based on the given id
+        /// </summary>
+        /// <param name="id">ID (guid) to search</param>
+        /// <returns>Matching person as PersonResponse object</returns>
+        PersonResponse? GetPersonById(Guid? id);
+
+        /// <summary>
+        /// Returns all person objects that matches with the given search field and search string
+        /// </summary>
+        /// <param name="searchBy"></param>
+        /// <param name="searchString"></param>
+        /// <returns>Returns all matching persons based on the given search field and search string</returns>
+        IEnumerable<PersonResponse> SearchPeople(string searchBy, string? searchString);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Entities;
 using ServiceContracts;
 using ServiceContracts.DTO;
+using Services.Helpers;
 
 namespace Services
 {
@@ -11,15 +12,7 @@ namespace Services
 
         public PersonResponse AddPerson(PersonAddRequest? request)
         {
-            if (request == null) 
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            if (string.IsNullOrEmpty(request.Name))
-            {
-                throw new ArgumentException("Name can't be blank");
-            }
+            ValidationHelper.ModelValidation(request);
 
             Person person = request.ToPerson();
             person.Id = Guid.NewGuid();
@@ -44,6 +37,25 @@ namespace Services
             return _people
                 .Select(p => p.ToPersonResponse())
                 .ToArray();
+        }
+
+        public PersonResponse? GetPersonById(Guid? id)
+        {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            PersonResponse? response = _people
+                .FirstOrDefault(p => p.Id == id)?
+                .ToPersonResponse();
+
+            return response;
+        }
+
+        public IEnumerable<PersonResponse> SearchPeople(string searchBy, string? searchString)
+        {
+            throw new NotImplementedException();
         }
     }
 }

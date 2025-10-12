@@ -179,7 +179,7 @@ namespace Tests
 
             PrintExpectedElements(peopleFromAdd);
 
-            IEnumerable<PersonResponse> people = _peopleService.SearchPeople((nameof(Person.Name)), "");
+            IEnumerable<PersonResponse> people = _peopleService.SearchPeople((nameof(PersonResponse.Name)), "");
 
             PrintActualElements(people);
 
@@ -203,9 +203,9 @@ namespace Tests
                 peopleFromAdd.Add(response);
             }
 
-            PrintExpectedElements(peopleFromAdd);
+            PrintExpectedElements(peopleFromAdd.Where(p => p.Name!.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
 
-            IEnumerable<PersonResponse> people = _peopleService.SearchPeople((nameof(Person.Name)), searchText);
+            IEnumerable<PersonResponse> people = _peopleService.SearchPeople((nameof(PersonResponse.Name)), searchText);
 
             PrintActualElements(people);
 
@@ -215,6 +215,40 @@ namespace Tests
                 {
                     Assert.Contains(person, people);
                 }
+            }
+        }
+
+        #endregion
+
+        #region GetSortedPeople
+
+        [Fact]
+        public void GetSortedPeople_SortBy_Name_Descending()
+        {
+            List<PersonResponse> peopleFromAdd = new List<PersonResponse>();
+
+            foreach (PersonAddRequest request in _validPersonAddRequests)
+            {
+                PersonResponse response = _peopleService.AddPerson(request);
+
+                peopleFromAdd.Add(response);
+            }
+
+            PersonResponse[] expectedPeople = peopleFromAdd
+                .OrderByDescending(p => p.Name)
+                .ToArray();
+
+            PrintExpectedElements(expectedPeople);
+
+            PersonResponse[] people = _peopleService
+                .GetSortedPeople(peopleFromAdd, (nameof(Person.Name)), SortOrderOptions.Descending)
+                .ToArray();
+
+            PrintActualElements(people);
+
+            for (int i = 0; i < expectedPeople.Length; i++)
+            {
+                Assert.Equal(expectedPeople[i], people[i]);
             }
         }
 

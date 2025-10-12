@@ -32,12 +32,29 @@ namespace ServiceContracts.DTO
 
         public Person ToPerson() 
         {
+            string? gender = "";
+
+            switch (Gender)
+            {
+                case (GenderOptions.Male):
+                    gender = "Male";
+                    break;
+
+                case (GenderOptions.Female):
+                    gender = "Female";
+                    break;
+
+                case (GenderOptions.Other):
+                    gender = "Other";
+                    break;
+            }
+
             return new Person
             {
                 Name = Name,
                 Email = Email,
                 DateOfBirth = DateOfBirth,
-                Gender = Gender.ToString(),
+                Gender = gender,
                 CountryId = CountryId,
                 Address = Address,
                 ReceiveNewsLetters = ReceiveNewsLetters

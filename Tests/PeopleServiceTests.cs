@@ -254,6 +254,81 @@ namespace Tests
 
         #endregion
 
+        #region UpdatePerson
+
+        [Fact]
+        public void UpdatePerson_Null_Request()
+        {
+            Assert.Throws<ArgumentNullException>(() => 
+            {
+                _peopleService.UpdatePerson(null);
+            });
+        }
+
+        [Fact]
+        public void UpdatePerson_InvalidId()
+        {
+            PersonUpdateRequest request = new PersonUpdateRequest()
+            {
+                PersonId = Guid.NewGuid()
+            };
+            Assert.Throws<ArgumentException>(() =>
+            {
+                _peopleService.UpdatePerson(request);
+            });
+        }
+
+        [Fact]
+        public void UpdatePerson_Null_PersonName()
+        {
+            foreach (PersonAddRequest addRequest in _validPersonAddRequests)
+            {
+                PersonResponse response = _peopleService.AddPerson(addRequest);
+            }
+
+            PersonUpdateRequest updateRequest = _peopleService
+                .GetAllPersons()
+                .First()
+                .ToPersonUpdateRequest();
+            updateRequest.Name = null;
+
+            Assert.Throws<ArgumentException>(() =>
+            {
+                _peopleService.UpdatePerson(updateRequest);
+            });
+        }
+
+        [Fact]
+        public void UpdatePerson_Update_Name_Email()
+        {
+            foreach (PersonAddRequest addRequest in _validPersonAddRequests)
+            {
+                PersonResponse response = _peopleService.AddPerson(addRequest);
+            }
+
+            string updatedName = "UpdatedName";
+            string updatedEmail = "UpdatedEmailAddress@example.com";
+            PersonUpdateRequest updateRequest = _peopleService
+                .GetAllPersons()
+                .First()
+                .ToPersonUpdateRequest();
+
+            Assert.NotEqual(updateRequest.Name, updatedName);
+            Assert.NotEqual(updateRequest.Email, updatedEmail);
+
+            updateRequest.Name = updatedName;
+            updateRequest.Email = updatedEmail;
+
+            _peopleService.UpdatePerson(updateRequest);
+
+            PersonResponse updatedPerson = _peopleService.GetPersonById(updateRequest.PersonId)!;
+
+            Assert.Equal(updatedPerson.Name, updatedName);
+            Assert.Equal(updatedPerson.Email, updatedEmail);
+        }
+
+        #endregion
+
         #region Helpers
 
         private void PrintExpectedElements(IEnumerable<object> expectedElements)

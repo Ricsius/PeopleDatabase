@@ -30,12 +30,33 @@ namespace Services
             return response;
         }
 
-        private PersonResponse ConvertPersonIntoResponse(Person person) 
+        public PersonResponse UpdatePerson(PersonUpdateRequest? request)
         {
-            PersonResponse response = person.ToPersonResponse();
-            response.CountryName = _countriesService.GetCountryById(response.CountryId)?.CountryName;
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
 
-            return response;
+            ValidationHelper.ModelValidation(request);
+
+            Person? person = _people.FirstOrDefault(p => p.Id == request.PersonId);
+
+            if (person == null)
+            {
+                throw new ArgumentException("Given person ID doesn't exist");
+            }
+
+
+
+            person.Name = request.Name;
+            person.Email = request.Email;
+            person.DateOfBirth = request.DateOfBirth;
+            person.Gender = request.Gender.ToString();
+            person.CountryId = request.CountryId;
+            person.Address = request.Address;
+            person.ReceiveNewsLetters = request.ReceiveNewsLetters;
+
+            return person.ToPersonResponse();
         }
 
         public IEnumerable<PersonResponse> GetAllPersons()
@@ -165,6 +186,14 @@ namespace Services
             }
 
             return sortedPeople;
+        }
+
+        private PersonResponse ConvertPersonIntoResponse(Person person)
+        {
+            PersonResponse response = person.ToPersonResponse();
+            response.CountryName = _countriesService.GetCountryById(response.CountryId)?.CountryName;
+
+            return response;
         }
     }
 }

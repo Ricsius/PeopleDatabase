@@ -13,6 +13,13 @@ namespace ServiceContracts
         PersonResponse AddPerson(PersonAddRequest? request);
 
         /// <summary>
+        /// Updates a person in the list of persons
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>Returns the updated person details</returns>
+        PersonResponse UpdatePerson(PersonUpdateRequest? request);
+
+        /// <summary>
         /// Return all persons
         /// </summary>
         /// <returns>Returns an IEnumerable of PersonResponse type</returns>

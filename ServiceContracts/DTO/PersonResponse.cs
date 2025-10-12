@@ -1,4 +1,5 @@
 ﻿using Entities;
+using ServiceContracts.Enums;
 using System.Text;
 
 namespace ServiceContracts.DTO
@@ -18,6 +19,21 @@ namespace ServiceContracts.DTO
         public string? CountryName { get; set; }
         public string? Address { get; set; }
         public bool ReceiveNewsLetters { get; set; }
+
+        public PersonUpdateRequest ToPersonUpdateRequest() 
+        {
+            return new PersonUpdateRequest
+            {
+                PersonId = PersonId,
+                Name = Name,
+                Email = Email,
+                DateOfBirth = DateOfBirth,
+                Gender = (GenderOptions)Enum.Parse(typeof(GenderOptions), Gender!, true),
+                CountryId = CountryId,
+                Address = Address,
+                ReceiveNewsLetters = ReceiveNewsLetters,
+            };
+        }
 
         public override string ToString()
         {

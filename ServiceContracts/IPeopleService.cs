@@ -20,6 +20,13 @@ namespace ServiceContracts
         PersonResponse UpdatePerson(PersonUpdateRequest? request);
 
         /// <summary>
+        /// Deletes a person in the list of persons
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Returns whether the deletion was successful or not</returns>
+        bool DeletePerson(Guid? id);
+
+        /// <summary>
         /// Return all persons
         /// </summary>
         /// <returns>Returns an IEnumerable of PersonResponse type</returns>

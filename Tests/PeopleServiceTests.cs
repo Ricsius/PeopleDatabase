@@ -329,6 +329,45 @@ namespace Tests
 
         #endregion
 
+        #region DeletePerson
+
+        [Fact]
+        public void DeletePerson_Null_Id()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                _peopleService.DeletePerson(null);
+            });
+        }
+
+        [Fact]
+        public void DeletePerson_InvalidId() 
+        {
+            foreach (PersonAddRequest addRequest in _validPersonAddRequests)
+            {
+                PersonResponse response = _peopleService.AddPerson(addRequest);
+            }
+
+            bool deleted = _peopleService.DeletePerson(Guid.NewGuid());
+            int peopleCount = _peopleService.GetAllPersons().Count();
+
+            Assert.False(deleted);
+            Assert.Equal(_validPersonAddRequests.Length, peopleCount);
+        }
+
+        [Fact]
+        public void DeletePerson_ValidId()
+        {
+            PersonResponse person = _peopleService.AddPerson(_validPersonAddRequests[0]);
+            bool deleted = _peopleService.DeletePerson(person.PersonId);
+            int peopleCount = _peopleService.GetAllPersons().Count();
+
+            Assert.True(deleted);
+            Assert.Empty(_peopleService.GetAllPersons());
+        }
+
+        #endregion
+
         #region Helpers
 
         private void PrintExpectedElements(IEnumerable<object> expectedElements)

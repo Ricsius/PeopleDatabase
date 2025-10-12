@@ -59,6 +59,25 @@ namespace Services
             return person.ToPersonResponse();
         }
 
+        public bool DeletePerson(Guid? id)
+        {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            Person? personToDelete = _people.FirstOrDefault(p => p.Id == id);
+
+            if (personToDelete == null)
+            {
+                return false;
+            }
+
+            _people.RemoveAll(p => p.Id == id);
+
+            return true;
+        }
+
         public IEnumerable<PersonResponse> GetAllPersons()
         {
             return _people

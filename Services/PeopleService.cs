@@ -11,6 +11,128 @@ namespace Services
         private readonly List<Person> _people = new List<Person>();
         private readonly ICountriesService _countriesService = new CountriesService();
 
+        public PeopleService(bool initialize = true) 
+        {
+            if (initialize)
+            {
+                Person[] peopleToAdd = new Person[]
+                {
+                    new Person()
+                    {
+                        Id = Guid.Parse("15C978DC-EFD5-45C5-82AD-9DBD53C42B2D"),
+                        Name = "Haleigh",
+                        Email = "hmackaile0@dailymail.co.uk",
+                        DateOfBirth = DateTime.Parse("1998-04-13"),
+                        Gender = "Male",
+                        Address = "58 Erie Road",
+                        ReceiveNewsLetters = false,
+                        CountryId = Guid.Parse("1F116DD4-2B51-4B6D-BA47-948D66B25411")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("0D0F8E63-8F26-48BA-844C-7D96F7D6A093"),
+                        Name = "Vlad",
+                        Email = "vcheal1@ovh.net",
+                        DateOfBirth = DateTime.Parse("1991-06-15"),
+                        Gender = "Other",
+                        Address = "048 Dawn Street",
+                        ReceiveNewsLetters = false,
+                        CountryId = Guid.Parse("38920DC5-11CC-412D-88FA-A25350F9E515")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("3D1E56DD-D28D-4F48-91B2-D671CF9762DC"),
+                        Name = "Felicia",
+                        Email = "fphear2@wikia.com",
+                        DateOfBirth = DateTime.Parse("1994-03-27"),
+                        Gender = "Female",
+                        Address = "16302 Arizona Plaza",
+                        ReceiveNewsLetters = true,
+                        CountryId = Guid.Parse("38920DC5-11CC-412D-88FA-A25350F9E515")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("39CB661D-1808-4FDF-97F0-358C163545CB"),
+                        Name = "Stella",
+                        Email = "sgoomes3@loc.gov",
+                        DateOfBirth = DateTime.Parse("1990-06-03"),
+                        Gender = "Female",
+                        Address = "5802 Butternut Place",
+                        ReceiveNewsLetters = false,
+                        CountryId = Guid.Parse("38920DC5-11CC-412D-88FA-A25350F9E515")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("16ED9FED-2929-41B9-9C8C-D2005A9A4878"),
+                        Name = "Carrie",
+                        Email = "clindenbaum4@princeton.edu",
+                        DateOfBirth = DateTime.Parse("1998-01-10"),
+                        Gender = "Female",
+                        Address = "56 Esch Court",
+                        ReceiveNewsLetters = true,
+                        CountryId = Guid.Parse("26922E6D-7EA2-4451-8171-54BA632C5FB4")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("37008868-B42A-4EDC-96E5-72C6AB3CBF10"),
+                        Name = "Theodore",
+                        Email = "tgradon5@phoca.cz",
+                        DateOfBirth = DateTime.Parse("1996-09-26"),
+                        Gender = "Male",
+                        Address = "06540 Hoffman Lane",
+                        ReceiveNewsLetters = false,
+                        CountryId = Guid.Parse("26922E6D-7EA2-4451-8171-54BA632C5FB4")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("95F475CD-9420-4E21-9A7F-D4850B003022"),
+                        Name = "Cam",
+                        Email = "ctytler6@example.com",
+                        DateOfBirth = DateTime.Parse("1990-08-05"),
+                        Gender = "Male",
+                        Address = "3 Lakewood Junction",
+                        ReceiveNewsLetters = false,
+                        CountryId = Guid.Parse("2838A2DB-C484-4414-B80C-D1E82F631D07")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("2E6838F5-B65B-4E4B-BB6C-4427820C025B"),
+                        Name = "Chris",
+                        Email = "cfawbert7@myspace.com",
+                        DateOfBirth = DateTime.Parse("1994-03-18"),
+                        Gender = "Male",
+                        Address = "3436 Mosinee Hill",
+                        ReceiveNewsLetters = false,
+                        CountryId = Guid.Parse("2838A2DB-C484-4414-B80C-D1E82F631D07")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("47C625C6-6C99-4C95-864D-AE0BF20200BE"),
+                        Name = "Marie-jeanne",
+                        Email = "mcrookall8@blinklist.com",
+                        DateOfBirth = DateTime.Parse("1993-11-14"),
+                        Gender = "Female",
+                        Address = "70 Tony Circle",
+                        ReceiveNewsLetters = true,
+                        CountryId = Guid.Parse("2838A2DB-C484-4414-B80C-D1E82F631D07")
+                    },
+                    new Person()
+                    {
+                        Id = Guid.Parse("2729ED42-CF33-4212-B615-5C5A5E4EE7B6"),
+                        Name = "Caitlin",
+                        Email = "cswancott9@zdnet.com",
+                        DateOfBirth = DateTime.Parse("1996-06-01"),
+                        Gender = "Female",
+                        Address = "619 Glendale Circle",
+                        ReceiveNewsLetters = false,
+                        CountryId = Guid.Parse("2838A2DB-C484-4414-B80C-D1E82F631D07")
+                    },
+                };
+
+                _people.AddRange(peopleToAdd);
+            }
+        }
+
         public PersonResponse AddPerson(PersonAddRequest? request)
         {
             if (request == null)

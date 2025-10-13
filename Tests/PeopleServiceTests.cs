@@ -16,8 +16,8 @@ namespace Tests
 
         public PeopleServiceTests(ITestOutputHelper outputHelper)
         {
-            _peopleService = new PeopleService();
-            _countriesService = new CountriesService();
+            _peopleService = new PeopleService(false);
+            _countriesService = new CountriesService(false);
             _outputHelper = outputHelper;
 
             CountryAddRequest countryRequest1 = new CountryAddRequest()

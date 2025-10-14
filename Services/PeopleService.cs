@@ -178,7 +178,7 @@ namespace Services
             person.Address = request.Address;
             person.ReceiveNewsLetters = request.ReceiveNewsLetters;
 
-            return person.ToPersonResponse();
+            return ConvertPersonIntoResponse(person);
         }
 
         public bool DeletePerson(Guid? id)
@@ -203,7 +203,7 @@ namespace Services
         public IEnumerable<PersonResponse> GetAllPersons()
         {
             return _people
-                .Select(p => p.ToPersonResponse())
+                .Select(p => ConvertPersonIntoResponse(p))
                 .ToArray();
         }
 
@@ -214,14 +214,15 @@ namespace Services
                 throw new ArgumentNullException(nameof(id));
             }
 
-            PersonResponse? response = _people
-                .FirstOrDefault(p => p.Id == id)?
-                .ToPersonResponse();
+            Person? person = _people.FirstOrDefault(p => p.Id == id);
+            PersonResponse? response = person != null 
+                ? ConvertPersonIntoResponse(person)
+                : null;
 
             return response;
         }
 
-        public IEnumerable<PersonResponse> SearchPeople(string searchBy, string? searchString)
+        public IEnumerable<PersonResponse> SearchPeople(string? searchBy, string? searchString)
         {
             IEnumerable<PersonResponse> people = GetAllPersons();
             IEnumerable<PersonResponse> matchingPeople;
@@ -255,7 +256,7 @@ namespace Services
                 case nameof(PersonResponse.Gender):
                     matchingPeople = people
                         .Where(p => !string.IsNullOrEmpty(p.Gender)
-                        ? p.Gender.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                        ? p.Gender.Equals(searchString, StringComparison.OrdinalIgnoreCase)
                         : true);
                     break;
 

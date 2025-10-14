@@ -45,7 +45,7 @@ namespace ServiceContracts
         /// <param name="searchBy"></param>
         /// <param name="searchString"></param>
         /// <returns>Returns all matching persons based on the given search field and search string</returns>
-        IEnumerable<PersonResponse> SearchPeople(string searchBy, string? searchString);
+        IEnumerable<PersonResponse> SearchPeople(string? searchBy, string? searchString);
 
         /// <summary>
         /// Returns a sorted IEnumerable of people

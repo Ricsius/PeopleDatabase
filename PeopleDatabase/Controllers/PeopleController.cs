@@ -5,17 +5,20 @@ using ServiceContracts.Enums;
 
 namespace PeopleDatabase.Controllers
 {
+    [Route("[controller]")]
     public class PeopleController : Controller
     {
         private readonly IPeopleService _peopleService;
+        private readonly ICountriesService _countriesService;
 
-        public PeopleController(IPeopleService peopleService)
+        public PeopleController(IPeopleService peopleService, ICountriesService countriesService)
         {
             _peopleService = peopleService;
+            _countriesService = countriesService;
         }
 
-        [Route("/people/index")]
-        [Route("")]
+        [Route("[action]")]
+        [Route("/")]
         public IActionResult Index(
             string? searchBy, 
             string? searchString, 
@@ -43,6 +46,45 @@ namespace PeopleDatabase.Controllers
             ViewBag.SortOrder = sortOrder.ToString();
 
             return View(people);
+        }
+
+        [Route("[action]")]
+        [HttpGet]
+        public IActionResult Create()
+        {
+            SetupCreate();
+
+            return View();
+        }
+
+        [Route("[action]")]
+        [HttpPost]
+        public IActionResult Create(PersonAddRequest request) 
+        {
+            if (!ModelState.IsValid)
+            {
+                SetupCreate();
+
+                ViewBag.Errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToArray();
+
+                return View();
+            }
+
+            _peopleService.AddPerson(request);
+
+            return RedirectToAction("Index");
+        }
+
+        private void SetupCreate()
+        {
+            IEnumerable<CountryResponse> countries = _countriesService
+                .GetAllCountries()
+                .OrderBy(c => c.CountryName);
+
+            ViewBag.Countries = countries;
         }
     }
 }

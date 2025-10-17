@@ -71,7 +71,7 @@ namespace PeopleDatabase.Controllers
                     .Select(e => e.ErrorMessage)
                     .ToArray();
 
-                return View();
+                return View(request);
             }
 
             _peopleService.AddPerson(request);

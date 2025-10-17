@@ -24,7 +24,7 @@ namespace ServiceContracts.DTO
         [Required(ErrorMessage = "Gender can't be blank")]
         public GenderOptions? Gender { get; set; }
 
-        [Required(ErrorMessage = "CountryId can't be blank")]
+        [Required(ErrorMessage = "Country can't be blank")]
         public Guid CountryId { get; set; }
 
         [Required(ErrorMessage = "Address can't be blank")]

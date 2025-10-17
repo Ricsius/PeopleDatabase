@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -20,9 +21,9 @@ namespace PeopleDatabase.Controllers
         [Route("[action]")]
         [Route("/")]
         public IActionResult Index(
-            string? searchBy, 
-            string? searchString, 
-            string sortby = nameof(PersonResponse.Name), 
+            string? searchBy,
+            string? searchString,
+            string sortby = nameof(PersonResponse.Name),
             SortOrderOptions sortOrder = SortOrderOptions.Ascending)
         {
             ViewBag.SearchFields = new Dictionary<string, string>()
@@ -59,7 +60,7 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]")]
         [HttpPost]
-        public IActionResult Create(PersonAddRequest request) 
+        public IActionResult Create(PersonAddRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -75,15 +76,19 @@ namespace PeopleDatabase.Controllers
 
             _peopleService.AddPerson(request);
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         private void SetupCreate()
         {
-            IEnumerable<CountryResponse> countries = _countriesService
+            IEnumerable<SelectListItem> countries = _countriesService
                 .GetAllCountries()
-                .OrderBy(c => c.CountryName);
-
+                .OrderBy(c => c.CountryName)
+                .Select(c => new SelectListItem()
+                {
+                    Text = c.CountryName,
+                    Value = c.CountryId.ToString()
+                });
             ViewBag.Countries = countries;
         }
     }

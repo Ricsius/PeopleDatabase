@@ -5,7 +5,7 @@
 
 <h1>People</h1>
 
-<form action="~/people/index" method="get">
+<form asp-controller="People" asp-action="Index" method="get">
     <div class="box flex">
         <div class="flex-1">
             <select class="form-input" name="searchBy">
@@ -29,7 +29,7 @@
 
         <div class="flex-1">
             <button class="button button-blue-back">Search</button>
-            <a href="~/people/index" class="link-hover">Clear all</a>
+            <a asp-controller="People" asp-action="Index" class="link-hover">Clear all</a>
         </div>
     </div>
 </form>

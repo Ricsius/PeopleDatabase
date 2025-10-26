@@ -53,7 +53,7 @@ namespace PeopleDatabase.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            SetupCreate();
+            CountriesDropdownSetup();
 
             return View();
         }
@@ -64,7 +64,7 @@ namespace PeopleDatabase.Controllers
         {
             if (!ModelState.IsValid)
             {
-                SetupCreate();
+                CountriesDropdownSetup();
 
                 ViewBag.Errors = ModelState.Values
                     .SelectMany(v => v.Errors)
@@ -79,7 +79,54 @@ namespace PeopleDatabase.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private void SetupCreate()
+        [Route("[action]/{personId}")]
+        [HttpGet]
+        public IActionResult Edit(Guid personId)
+        {
+            PersonResponse? response = _peopleService.GetPersonById(personId);
+
+            if (response == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            PersonUpdateRequest request = response.ToPersonUpdateRequest();
+
+            CountriesDropdownSetup();
+
+            return View(request);
+        }
+
+        [Route("[action]/{personId}")]
+        [HttpPost]
+        public IActionResult Edit(PersonUpdateRequest request)
+        {
+
+            PersonResponse? personResponse = _peopleService.GetPersonById(request.PersonId);
+
+            if (personResponse == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                CountriesDropdownSetup();
+
+                ViewBag.Errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToArray();
+
+                return View(request);
+            }
+
+            _peopleService.UpdatePerson(request);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private void CountriesDropdownSetup()
         {
             IEnumerable<SelectListItem> countries = _countriesService
                 .GetAllCountries()

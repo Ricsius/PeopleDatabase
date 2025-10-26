@@ -63,7 +63,7 @@
             <div class="w-25">
                 <label class="form-label" asp-for="CountryId">Country</label>
             </div>
-            
+
             <div class="flex-1">
                 <select class="form-input" asp-for="CountryId" asp-items="@ViewBag.Countries">
                     <option value="">Please select</option>
@@ -116,6 +116,15 @@
     </form>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+@section scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.jsa"
+            asp-fallback-test="window.jQuery"
+            asp-fallback-src="~/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.jsa"
+            asp-fallback-test="window.jQuery.validator"
+            asp-fallback-src="~/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.jsa"
+            asp-fallback-test="window.jQuery.validator.unobtrusive"
+            asp-fallback-src="~/jquery.validate.unobtrusive.min.js"></script>
+}

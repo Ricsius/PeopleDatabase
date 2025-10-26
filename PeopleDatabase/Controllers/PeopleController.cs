@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Entities;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ServiceContracts;
 using ServiceContracts.DTO;
@@ -122,6 +123,36 @@ namespace PeopleDatabase.Controllers
             }
 
             _peopleService.UpdatePerson(request);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Route("[action]/{personId}")]
+        [HttpGet]
+        public IActionResult Delete(Guid personId)
+        {
+            PersonResponse? response = _peopleService.GetPersonById(personId);
+
+            if (response == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(response);
+        }
+
+        [Route("[action]/{personId}")]
+        [HttpPost]
+        public IActionResult Delete(PersonResponse person)
+        {
+            PersonResponse? response = _peopleService.GetPersonById(person.PersonId);
+
+            if (response == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            _peopleService.DeletePerson(person.PersonId);
 
             return RedirectToAction(nameof(Index));
         }

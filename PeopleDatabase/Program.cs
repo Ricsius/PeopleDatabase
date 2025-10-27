@@ -1,5 +1,7 @@
 using ServiceContracts;
 using Services;
+using Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace PeopleDatabase
 {
@@ -11,6 +13,10 @@ namespace PeopleDatabase
             builder.Services.AddControllersWithViews();
             builder.Services.AddSingleton<ICountriesService, CountriesService>();
             builder.Services.AddSingleton<IPeopleService, PeopleService>();
+            builder.Services.AddDbContext<PeopleDbContext>(options => 
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+            });
 
             var app = builder.Build();
 

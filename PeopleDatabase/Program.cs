@@ -11,8 +11,8 @@ namespace PeopleDatabase
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllersWithViews();
-            builder.Services.AddSingleton<ICountriesService, CountriesService>();
-            builder.Services.AddSingleton<IPeopleService, PeopleService>();
+            builder.Services.AddScoped<ICountriesService, CountriesService>();
+            builder.Services.AddScoped<IPeopleService, PeopleService>();
             builder.Services.AddDbContext<PeopleDbContext>(options => 
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));

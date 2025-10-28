@@ -35,5 +35,12 @@ namespace Entities
                 modelBuilder.Entity<Person>().HasData(person);
             }
         }
+
+        public Person[] Sp_GetAllPeople() 
+        {
+            IQueryable<Person> result = People.FromSqlRaw("EXECUTE [dbo].[GetAllPeople]");
+
+            return result.ToArray();
+        }
     }
 }

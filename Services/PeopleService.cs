@@ -90,8 +90,7 @@ namespace Services
 
         public IEnumerable<PersonResponse> GetAllPersons()
         {
-            return _database.People
-                .ToArray()
+            return _database.Sp_GetAllPeople()
                 .Select(p => ConvertPersonIntoResponse(p))
                 .ToArray();
         }

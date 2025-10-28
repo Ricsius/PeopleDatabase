@@ -28,7 +28,7 @@ namespace Entities
             }
 
             string peopleJson = File.ReadAllText("people.json");
-            Person[] people = JsonSerializer.Deserialize<Person[]>(countriesJson)!;
+            Person[] people = JsonSerializer.Deserialize<Person[]>(peopleJson)!;
 
             foreach (Person person in people)
             {

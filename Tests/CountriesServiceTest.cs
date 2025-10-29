@@ -1,4 +1,5 @@
-﻿using ServiceContracts;
+﻿using Entities;
+using ServiceContracts;
 using ServiceContracts.DTO;
 using Services;
 
@@ -7,10 +8,13 @@ namespace Tests
     public class CountriesServiceTest
     {
         private readonly ICountriesService _countriesService;
+        private readonly List<Country> _countries = new List<Country>();
 
         public CountriesServiceTest() 
         {
-            _countriesService = new CountriesService(false);
+            PeopleDbContext mockContext = TestHelper.CreateMockPeopleDbContext(_countries, new List<Person>());
+            
+            _countriesService = new CountriesService(mockContext);
         }
 
         #region AddCountry

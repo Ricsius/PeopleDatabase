@@ -1,9 +1,9 @@
-﻿using ServiceContracts;
+﻿using Entities;
+using ServiceContracts;
 using ServiceContracts.DTO;
-using Services;
 using ServiceContracts.Enums;
+using Services;
 using Xunit.Abstractions;
-using Entities;
 
 namespace Tests
 {
@@ -13,11 +13,15 @@ namespace Tests
         private readonly ICountriesService _countriesService;
         private readonly PersonAddRequest[] _validPersonAddRequests;
         private readonly ITestOutputHelper _outputHelper;
+        private readonly List<Country> _countries = new List<Country>();
+        private readonly List<Person> _people = new List<Person>();
 
         public PeopleServiceTests(ITestOutputHelper outputHelper)
         {
-            _peopleService = new PeopleService(false);
-            _countriesService = new CountriesService(false);
+            PeopleDbContext mockContext = TestHelper.CreateMockPeopleDbContext(_countries, _people);
+
+            _countriesService = new CountriesService(mockContext);
+            _peopleService = new PeopleService(mockContext, _countriesService);
             _outputHelper = outputHelper;
 
             CountryAddRequest countryRequest1 = new CountryAddRequest()

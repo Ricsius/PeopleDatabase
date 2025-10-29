@@ -5,8 +5,8 @@ namespace Entities
 {
     public class PeopleDbContext : DbContext
     {
-        public DbSet<Country> Countries { get; set; }
-        public DbSet<Person> People { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
+        public virtual DbSet<Person> People { get; set; }
 
         public PeopleDbContext(DbContextOptions options) : base(options)
         { 
@@ -36,7 +36,7 @@ namespace Entities
             }
         }
 
-        public Person[] Sp_GetAllPeople() 
+        public virtual Person[] Sp_GetAllPeople() 
         {
             IQueryable<Person> result = People.FromSqlRaw("EXECUTE [dbo].[GetAllPeople]");
 

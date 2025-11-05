@@ -1,5 +1,4 @@
 ﻿using Entities;
-using Microsoft.EntityFrameworkCore.Storage;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -30,8 +29,7 @@ namespace Services
             Person person = request.ToPerson();
             person.Id = Guid.NewGuid();
 
-            _database.People.Add(person);
-            _database.SaveChanges();
+            _database.Sp_InsertPerson(person);
 
             PersonResponse response = ConvertPersonIntoResponse(person);
 

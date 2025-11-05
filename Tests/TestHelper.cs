@@ -16,6 +16,7 @@ namespace Tests
             mockContext.Setup(m => m.Countries).Returns(countriesSet);
             mockContext.Setup(m => m.People).Returns(peopleSet);
             mockContext.Setup(m => m.Sp_GetAllPeople()).Returns(() => personCollection.ToArray());
+            mockContext.Setup(m => m.Sp_InsertPerson(It.IsAny<Person>())).Callback<Person>(p => personCollection.Add(p));
 
             return mockContext.Object;
         }

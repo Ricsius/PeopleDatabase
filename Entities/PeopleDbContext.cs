@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace Entities
@@ -41,6 +42,27 @@ namespace Entities
             IQueryable<Person> result = People.FromSqlRaw("EXECUTE [dbo].[GetAllPeople]");
 
             return result.ToArray();
+        }
+
+        public virtual int Sp_InsertPerson(Person person)
+        {
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Id", person.Id),
+                new SqlParameter("@Name", person.Name),
+                new SqlParameter("@Email", person.Email),
+                new SqlParameter("@DateOfBirth", person.DateOfBirth),
+                new SqlParameter("@Gender", person.Gender),
+                new SqlParameter("@CountryId", person.CountryId),
+                new SqlParameter("@Address", person.Address),
+                new SqlParameter("@ReceiveNewsLetters", person.ReceiveNewsLetters),
+            };
+
+            string command = "EXECUTE [dbo].[InsertPerson] @Id, @Name, @Email, @DateOfBirth, @Gender, @CountryId, @Address, @ReceiveNewsLetters";
+
+            int result = Database.ExecuteSqlRaw(command, parameters);
+
+            return result;
         }
     }
 }

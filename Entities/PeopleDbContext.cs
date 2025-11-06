@@ -35,6 +35,18 @@ namespace Entities
             {
                 modelBuilder.Entity<Person>().HasData(person);
             }
+
+            modelBuilder.Entity<Person>().Property(p => p.Tin)
+                .HasColumnName("TaxIdentificationNumber")
+                .HasColumnType("varchar(8)")
+                .HasDefaultValue("ABC12345");
+            /*
+            modelBuilder.Entity<Person>()
+                .HasIndex(p => p.Tin).IsUnique();
+            */
+
+            modelBuilder.Entity<Person>()
+                .ToTable(t => t.HasCheckConstraint("CHK_TIN", "len([TaxIdentificationNumber]) = 8"));
         }
 
         public virtual Person[] Sp_GetAllPeople() 

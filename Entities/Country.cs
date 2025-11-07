@@ -9,5 +9,7 @@ namespace Entities
 
         [StringLength(40)]
         public string? Name { get; set; }
+
+        public ICollection<Person>? People { get; set; }
     }
 }

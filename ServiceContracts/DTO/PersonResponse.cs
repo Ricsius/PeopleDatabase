@@ -104,6 +104,7 @@ namespace ServiceContracts.DTO
                 CountryId = person.CountryId,
                 Address = person.Address,
                 ReceiveNewsLetters = person.ReceiveNewsLetters,
+                CountryName = person.Country?.Name
             };
 
             return response;

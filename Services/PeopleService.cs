@@ -1,8 +1,10 @@
 ﻿using Entities;
+using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using Services.Helpers;
+using System;
 
 namespace Services
 {
@@ -31,7 +33,7 @@ namespace Services
 
             _database.Sp_InsertPerson(person);
 
-            PersonResponse response = ConvertPersonIntoResponse(person);
+            PersonResponse response = person.ToPersonResponse();
 
             return response;
         }
@@ -63,7 +65,7 @@ namespace Services
 
             _database.SaveChanges();
 
-            return ConvertPersonIntoResponse(person);
+            return person.ToPersonResponse();
         }
 
         public bool DeletePerson(Guid? id)
@@ -88,8 +90,11 @@ namespace Services
 
         public IEnumerable<PersonResponse> GetAllPersons()
         {
-            return _database.Sp_GetAllPeople()
-                .Select(p => ConvertPersonIntoResponse(p))
+            //Person[] people = _database.Sp_GetAllPeople();
+            IEnumerable<Person> people = _database.People.Include(nameof(Person.Country));
+
+            return people
+                .Select(p => p.ToPersonResponse())
                 .ToArray();
         }
 
@@ -101,9 +106,10 @@ namespace Services
             }
 
             Person? person = _database.People
+                .Include(nameof(Person.Country))
                 .FirstOrDefault(p => p.Id == id);
             PersonResponse? response = person != null 
-                ? ConvertPersonIntoResponse(person)
+                ? person.ToPersonResponse()
                 : null;
 
             return response;
@@ -215,14 +221,6 @@ namespace Services
             }
 
             return sortedPeople;
-        }
-
-        private PersonResponse ConvertPersonIntoResponse(Person person)
-        {
-            PersonResponse response = person.ToPersonResponse();
-            response.CountryName = _countriesService.GetCountryById(response.CountryId)?.CountryName;
-
-            return response;
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Tests
             mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.Expression).Returns(queryable.Expression);
             mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.Provider).Returns(queryable.Provider);
             mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+            mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
 
             return mockCountriesSet.Object;
         }
@@ -43,7 +43,7 @@ namespace Tests
             mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.Expression).Returns(queryable.Expression);
             mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.Provider).Returns(queryable.Provider);
             mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.GetEnumerator()).Returns(queryable.GetEnumerator());
+            mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
 
             return mockPeopleSet.Object;
         }

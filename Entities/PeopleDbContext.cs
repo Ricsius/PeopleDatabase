@@ -47,6 +47,15 @@ namespace Entities
 
             modelBuilder.Entity<Person>()
                 .ToTable(t => t.HasCheckConstraint("CHK_TIN", "len([TaxIdentificationNumber]) = 8"));
+
+            /*
+            modelBuilder.Entity<Person>(e =>
+            {
+                e.HasOne<Country>(p => p.Country)
+                .WithMany(c => c.People)
+                .HasForeignKey(c => c.CountryId);
+            });
+            */
         }
 
         public virtual Person[] Sp_GetAllPeople() 

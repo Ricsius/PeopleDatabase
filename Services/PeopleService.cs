@@ -19,7 +19,7 @@ namespace Services
             _countriesService = countriesService;
         }
 
-        public PersonResponse AddPerson(PersonAddRequest? request)
+        public async Task<PersonResponse> AddPerson(PersonAddRequest? request)
         {
             if (request == null)
             {
@@ -31,14 +31,16 @@ namespace Services
             Person person = request.ToPerson();
             person.Id = Guid.NewGuid();
 
-            _database.Sp_InsertPerson(person);
+            //_database.Sp_InsertPerson(person);
+            _database.People.Add(person);
+            await _database.SaveChangesAsync();
 
             PersonResponse response = person.ToPersonResponse();
 
             return response;
         }
 
-        public PersonResponse UpdatePerson(PersonUpdateRequest? request)
+        public async Task<PersonResponse> UpdatePerson(PersonUpdateRequest? request)
         {
             if (request == null)
             {
@@ -47,8 +49,8 @@ namespace Services
 
             ValidationHelper.ModelValidation(request);
 
-            Person? person = _database.People
-                .FirstOrDefault(p => p.Id == request.PersonId);
+            Person? person = await _database.People
+                .FirstOrDefaultAsync(p => p.Id == request.PersonId);
 
             if (person == null)
             {
@@ -63,19 +65,19 @@ namespace Services
             person.Address = request.Address;
             person.ReceiveNewsLetters = request.ReceiveNewsLetters;
 
-            _database.SaveChanges();
+            await _database.SaveChangesAsync();
 
             return person.ToPersonResponse();
         }
 
-        public bool DeletePerson(Guid? id)
+        public async Task<bool> DeletePerson(Guid? id)
         {
             if (id == null)
             {
                 throw new ArgumentNullException(nameof(id));
             }
-            Person? personToDelete = _database.People
-                .FirstOrDefault(p => p.Id == id);
+            Person? personToDelete = await _database.People
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (personToDelete == null)
             {
@@ -83,31 +85,33 @@ namespace Services
             }
 
             _database.People.Remove(personToDelete);
-            _database.SaveChanges();
+            await _database.SaveChangesAsync();
 
             return true;
         }
 
-        public IEnumerable<PersonResponse> GetAllPersons()
+        public async Task<IEnumerable<PersonResponse>> GetAllPersons()
         {
             //Person[] people = _database.Sp_GetAllPeople();
-            IEnumerable<Person> people = _database.People.Include(nameof(Person.Country));
+            IEnumerable<Person> people = await _database.People
+                .Include(nameof(Person.Country))
+                .ToArrayAsync();
 
             return people
                 .Select(p => p.ToPersonResponse())
                 .ToArray();
         }
 
-        public PersonResponse? GetPersonById(Guid? id)
+        public async Task<PersonResponse?> GetPersonById(Guid? id)
         {
             if (id == null)
             {
                 throw new ArgumentNullException(nameof(id));
             }
 
-            Person? person = _database.People
+            Person? person = await _database.People
                 .Include(nameof(Person.Country))
-                .FirstOrDefault(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
             PersonResponse? response = person != null 
                 ? person.ToPersonResponse()
                 : null;
@@ -115,9 +119,9 @@ namespace Services
             return response;
         }
 
-        public IEnumerable<PersonResponse> SearchPeople(string? searchBy, string? searchString)
+        public async Task<IEnumerable<PersonResponse>> SearchPeople(string? searchBy, string? searchString)
         {
-            IEnumerable<PersonResponse> people = GetAllPersons();
+            IEnumerable<PersonResponse> people = await GetAllPersons();
             IEnumerable<PersonResponse> matchingPeople;
 
             if (string.IsNullOrEmpty(searchBy) || string.IsNullOrEmpty(searchString))
@@ -175,7 +179,7 @@ namespace Services
             return matchingPeople;
         }
 
-        public IEnumerable<PersonResponse> GetSortedPeople(IEnumerable<PersonResponse> people, string sortBy, SortOrderOptions sortOrder)
+        public async Task<IEnumerable<PersonResponse>> GetSortedPeople(IEnumerable<PersonResponse> people, string sortBy, SortOrderOptions sortOrder)
         {
             IEnumerable<PersonResponse> sortedPeople;
 
@@ -219,8 +223,8 @@ namespace Services
             {
                 sortedPeople = sortedPeople.Reverse();
             }
-
-            return sortedPeople;
+            ;
+            return await Task.FromResult(sortedPeople);
         }
     }
 }

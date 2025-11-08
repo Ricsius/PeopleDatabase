@@ -1,5 +1,4 @@
-﻿using Entities;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ServiceContracts;
 using ServiceContracts.DTO;
@@ -21,7 +20,7 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]")]
         [Route("/")]
-        public IActionResult Index(
+        public async Task<IActionResult> Index(
             string? searchBy,
             string? searchString,
             string sortby = nameof(PersonResponse.Name),
@@ -37,12 +36,12 @@ namespace PeopleDatabase.Controllers
                 { nameof(PersonResponse.Address), "Address" },
             };
 
-            IEnumerable<PersonResponse> people = _peopleService.SearchPeople(searchBy, searchString);
+            IEnumerable<PersonResponse> people = await _peopleService.SearchPeople(searchBy, searchString);
 
             ViewBag.SearchBy = searchBy;
             ViewBag.SearchString = searchString;
 
-            people = _peopleService.GetSortedPeople(people, sortby, sortOrder);
+            people = await _peopleService.GetSortedPeople(people, sortby, sortOrder);
 
             ViewBag.SortBy = sortby;
             ViewBag.SortOrder = sortOrder.ToString();
@@ -52,20 +51,20 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]")]
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            CountriesDropdownSetup();
+            await CountriesDropdownSetup();
 
             return View();
         }
 
         [Route("[action]")]
         [HttpPost]
-        public IActionResult Create(PersonAddRequest request)
+        public async Task<IActionResult> Create(PersonAddRequest request)
         {
             if (!ModelState.IsValid)
             {
-                CountriesDropdownSetup();
+                await CountriesDropdownSetup();
 
                 ViewBag.Errors = ModelState.Values
                     .SelectMany(v => v.Errors)
@@ -75,16 +74,16 @@ namespace PeopleDatabase.Controllers
                 return View(request);
             }
 
-            _peopleService.AddPerson(request);
+            await _peopleService.AddPerson(request);
 
             return RedirectToAction(nameof(Index));
         }
 
         [Route("[action]/{personId}")]
         [HttpGet]
-        public IActionResult Edit(Guid personId)
+        public async Task<IActionResult> Edit(Guid personId)
         {
-            PersonResponse? response = _peopleService.GetPersonById(personId);
+            PersonResponse? response = await _peopleService.GetPersonById(personId);
 
             if (response == null)
             {
@@ -93,17 +92,17 @@ namespace PeopleDatabase.Controllers
 
             PersonUpdateRequest request = response.ToPersonUpdateRequest();
 
-            CountriesDropdownSetup();
+            await CountriesDropdownSetup();
 
             return View(request);
         }
 
         [Route("[action]/{personId}")]
         [HttpPost]
-        public IActionResult Edit(PersonUpdateRequest request)
+        public async Task<IActionResult> Edit(PersonUpdateRequest request)
         {
 
-            PersonResponse? personResponse = _peopleService.GetPersonById(request.PersonId);
+            PersonResponse? personResponse = await _peopleService.GetPersonById(request.PersonId);
 
             if (personResponse == null)
             {
@@ -112,7 +111,7 @@ namespace PeopleDatabase.Controllers
 
             if (!ModelState.IsValid)
             {
-                CountriesDropdownSetup();
+                await CountriesDropdownSetup();
 
                 ViewBag.Errors = ModelState.Values
                     .SelectMany(v => v.Errors)
@@ -122,16 +121,16 @@ namespace PeopleDatabase.Controllers
                 return View(request);
             }
 
-            _peopleService.UpdatePerson(request);
+            await _peopleService.UpdatePerson(request);
 
             return RedirectToAction(nameof(Index));
         }
 
         [Route("[action]/{personId}")]
         [HttpGet]
-        public IActionResult Delete(Guid personId)
+        public async Task<IActionResult> Delete(Guid personId)
         {
-            PersonResponse? response = _peopleService.GetPersonById(personId);
+            PersonResponse? response = await _peopleService.GetPersonById(personId);
 
             if (response == null)
             {
@@ -143,31 +142,33 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]/{personId}")]
         [HttpPost]
-        public IActionResult Delete(PersonResponse person)
+        public async Task<IActionResult> Delete(PersonResponse person)
         {
-            PersonResponse? response = _peopleService.GetPersonById(person.PersonId);
+            PersonResponse? response = await _peopleService.GetPersonById(person.PersonId);
 
             if (response == null)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            _peopleService.DeletePerson(person.PersonId);
+            await _peopleService.DeletePerson(person.PersonId);
 
             return RedirectToAction(nameof(Index));
         }
 
-        private void CountriesDropdownSetup()
+        private async Task CountriesDropdownSetup()
         {
-            IEnumerable<SelectListItem> countries = _countriesService
-                .GetAllCountries()
+            IEnumerable<CountryResponse> countries = await _countriesService
+                .GetAllCountries();
+
+            IEnumerable<SelectListItem> items = countries
                 .OrderBy(c => c.CountryName)
                 .Select(c => new SelectListItem()
                 {
                     Text = c.CountryName,
                     Value = c.CountryId.ToString()
                 });
-            ViewBag.Countries = countries;
+            ViewBag.Countries = items;
         }
     }
 }

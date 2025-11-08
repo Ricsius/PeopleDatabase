@@ -10,34 +10,34 @@ namespace ServiceContracts
         /// </summary>
         /// <param name="request"></param>
         /// <returns>Returns the same person details, along with a newly generated ID</returns>
-        PersonResponse AddPerson(PersonAddRequest? request);
+        Task<PersonResponse> AddPerson(PersonAddRequest? request);
 
         /// <summary>
         /// Updates a person in the list of persons
         /// </summary>
         /// <param name="request"></param>
         /// <returns>Returns the updated person details</returns>
-        PersonResponse UpdatePerson(PersonUpdateRequest? request);
+        Task<PersonResponse> UpdatePerson(PersonUpdateRequest? request);
 
         /// <summary>
         /// Deletes a person in the list of persons
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Returns whether the deletion was successful or not</returns>
-        bool DeletePerson(Guid? id);
+        Task<bool> DeletePerson(Guid? id);
 
         /// <summary>
         /// Return all persons
         /// </summary>
         /// <returns>Returns an IEnumerable of PersonResponse type</returns>
-        IEnumerable<PersonResponse> GetAllPersons();
+        Task<IEnumerable<PersonResponse>> GetAllPersons();
 
         /// <summary>
         /// Returns a person object based on the given id
         /// </summary>
         /// <param name="id">ID (guid) to search</param>
         /// <returns>Matching person as PersonResponse object</returns>
-        PersonResponse? GetPersonById(Guid? id);
+        Task<PersonResponse?> GetPersonById(Guid? id);
 
         /// <summary>
         /// Returns all person objects that matches with the given search field and search string
@@ -45,7 +45,7 @@ namespace ServiceContracts
         /// <param name="searchBy"></param>
         /// <param name="searchString"></param>
         /// <returns>Returns all matching persons based on the given search field and search string</returns>
-        IEnumerable<PersonResponse> SearchPeople(string? searchBy, string? searchString);
+        Task<IEnumerable<PersonResponse>> SearchPeople(string? searchBy, string? searchString);
 
         /// <summary>
         /// Returns a sorted IEnumerable of people
@@ -54,6 +54,6 @@ namespace ServiceContracts
         /// <param name="sortBy"></param>
         /// <param name="sortOrder"></param>
         /// <returns>Returns the sorted people as a IEnumerable<PersonResponse></returns>
-        IEnumerable<PersonResponse> GetSortedPeople(IEnumerable<PersonResponse> people, string sortBy, SortOrderOptions sortOrder);
+        Task<IEnumerable<PersonResponse>> GetSortedPeople(IEnumerable<PersonResponse> people, string sortBy, SortOrderOptions sortOrder);
     }
 }

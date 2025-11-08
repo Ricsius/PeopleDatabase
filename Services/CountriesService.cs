@@ -1,4 +1,5 @@
 ﻿using Entities;
+using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 
@@ -13,7 +14,7 @@ namespace Services
             _database = database;
         }
 
-        public CountryResponse AddCountry(CountryAddRequest? request)
+        public async Task<CountryResponse> AddCountry(CountryAddRequest? request)
         {
             if (request == null)
             {
@@ -37,30 +38,29 @@ namespace Services
             country.Id = Guid.NewGuid();
 
             _database.Countries.Add(country);
-            _database.SaveChanges();
+            await _database.SaveChangesAsync();
 
             return country.ToCountryResponse();
         }
 
-        public IEnumerable<CountryResponse> GetAllCountries()
+        public async Task<IEnumerable<CountryResponse>> GetAllCountries()
         {
-            return _database.Countries
+            return await _database.Countries
                 .Select(c => c.ToCountryResponse())
-                .ToArray();
+                .ToArrayAsync();
         }
 
-        public CountryResponse? GetCountryById(Guid? id)
+        public async Task<CountryResponse?> GetCountryById(Guid? id)
         {
             if (id == null)
             {
                 throw new ArgumentNullException(nameof(id));
             }
 
-            CountryResponse? foundCountry = _database.Countries
-                .FirstOrDefault(c => c.Id == id)?
-                .ToCountryResponse();
+            Country? foundCountry = await _database.Countries
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-            return foundCountry;
+            return foundCountry?.ToCountryResponse();
         }
     }
 }

@@ -4,19 +4,16 @@ using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using Services.Helpers;
-using System;
 
 namespace Services
 {
     public class PeopleService : IPeopleService
     {
         private readonly PeopleDbContext _database;
-        private readonly ICountriesService _countriesService;
 
-        public PeopleService(PeopleDbContext database, ICountriesService countriesService) 
+        public PeopleService(PeopleDbContext database) 
         {
             _database = database;
-            _countriesService = countriesService;
         }
 
         public async Task<PersonResponse> AddPerson(PersonAddRequest? request)

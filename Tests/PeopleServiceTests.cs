@@ -21,7 +21,7 @@ namespace Tests
             PeopleDbContext mockContext = TestHelper.CreateMockPeopleDbContext(_countries, _people);
 
             _countriesService = new CountriesService(mockContext);
-            _peopleService = new PeopleService(mockContext, _countriesService);
+            _peopleService = new PeopleService(mockContext);
             _outputHelper = outputHelper;
 
             PrepareTestData().Wait();

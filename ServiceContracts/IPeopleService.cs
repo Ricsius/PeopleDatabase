@@ -55,5 +55,11 @@ namespace ServiceContracts
         /// <param name="sortOrder"></param>
         /// <returns>Returns the sorted people as a IEnumerable<PersonResponse></returns>
         Task<IEnumerable<PersonResponse>> GetSortedPeople(IEnumerable<PersonResponse> people, string sortBy, SortOrderOptions sortOrder);
+
+        /// <summary>
+        /// Returns the stored people in CSV format
+        /// </summary>
+        /// <returns>Returns a MemoryStream that contains the people's data in a CSV format</returns>
+        Task<MemoryStream> GetPeopleCsv();
     }
 }

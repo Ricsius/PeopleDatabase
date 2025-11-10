@@ -177,6 +177,15 @@ namespace PeopleDatabase.Controllers
             return view;
         }
 
+        [Route("[action]")]
+        [HttpGet]
+        public async Task<IActionResult> PeopleCsv()
+        {
+            MemoryStream stream = await _peopleService.GetPeopleCsv();
+
+            return File(stream, "application/octet-stream", "people.csv");
+        }
+
         private async Task CountriesDropdownSetup()
         {
             IEnumerable<CountryResponse> countries = await _countriesService

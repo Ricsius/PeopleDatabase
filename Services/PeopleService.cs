@@ -2,6 +2,7 @@
 using CsvHelper.Configuration;
 using Entities;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -17,6 +18,8 @@ namespace Services
         public PeopleService(PeopleDbContext database) 
         {
             _database = database;
+
+            ExcelPackage.License.SetNonCommercialPersonal("Placeholder");
         }
 
         public async Task<PersonResponse> AddPerson(PersonAddRequest? request)
@@ -263,6 +266,57 @@ namespace Services
                 }
             }
 
+            stream.Position = 0;
+
+            return stream;
+        }
+
+        public async Task<MemoryStream> GetPeopleExcel() 
+        {
+            MemoryStream stream = new MemoryStream();
+
+            using (ExcelPackage excelPackage = new ExcelPackage(stream)) 
+            {
+                ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets.Add("PeopleSheet");
+
+                workSheet.Cells["A1"].Value = nameof(PersonResponse.Name);
+                workSheet.Cells["B1"].Value = nameof(PersonResponse.Email);
+                workSheet.Cells["C1"].Value = nameof(PersonResponse.DateOfBirth);
+                workSheet.Cells["D1"].Value = nameof(PersonResponse.Age);
+                workSheet.Cells["E1"].Value = nameof(PersonResponse.Gender);
+                workSheet.Cells["F1"].Value = nameof(PersonResponse.CountryName);
+                workSheet.Cells["G1"].Value = nameof(PersonResponse.Address);
+                workSheet.Cells["H1"].Value = nameof(PersonResponse.ReceiveNewsLetters);
+
+                using (ExcelRange headerCells = workSheet.Cells["A1:H1"]) 
+                { 
+                    headerCells.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    headerCells.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                    headerCells.Style.Font.Bold = true;
+                }
+                
+                int row = 2;
+                IEnumerable<PersonResponse> people = await GetAllPersons();
+
+                foreach (PersonResponse person in people)
+                {
+                    workSheet.Cells[row, 1].Value = person.Name;
+                    workSheet.Cells[row, 2].Value = person.Email;
+                    workSheet.Cells[row, 3].Value = person.DateOfBirth.ToString("yyyy-MM-dd");
+                    workSheet.Cells[row, 4].Value = person.Age;
+                    workSheet.Cells[row, 5].Value = person.Gender;
+                    workSheet.Cells[row, 6].Value = person.CountryName;
+                    workSheet.Cells[row, 7].Value = person.Address;
+                    workSheet.Cells[row, 8].Value = person.ReceiveNewsLetters;
+
+                    row++;
+                }
+
+                workSheet.Cells[$"A1:H{row}"].AutoFitColumns();
+
+                await excelPackage.SaveAsync();
+            }
+            
             stream.Position = 0;
 
             return stream;

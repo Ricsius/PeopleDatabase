@@ -186,6 +186,15 @@ namespace PeopleDatabase.Controllers
             return File(stream, "application/octet-stream", "people.csv");
         }
 
+        [Route("[action]")]
+        [HttpGet]
+        public async Task<IActionResult> PeopleExcel()
+        {
+            MemoryStream stream = await _peopleService.GetPeopleExcel();
+
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "people.xlsx");
+        }
+
         private async Task CountriesDropdownSetup()
         {
             IEnumerable<CountryResponse> countries = await _countriesService

@@ -1,4 +1,5 @@
-﻿using Entities;
+﻿using AutoFixture;
+using Entities;
 using EntityFrameworkCoreMock;
 using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
@@ -12,8 +13,8 @@ namespace Tests
     public class PeopleServiceTests
     {
         private readonly IPeopleService _peopleService;
-        private readonly ICountriesService _countriesService;
-        private PersonAddRequest[] _validPersonAddRequests = [];
+        private PersonAddRequest[] _validPersonAddRequests;
+        private readonly IFixture _fixture;
         private readonly ITestOutputHelper _outputHelper;
         private readonly List<Country> _countries = new List<Country>();
         private readonly List<Person> _people = new List<Person>();
@@ -26,11 +27,19 @@ namespace Tests
             mockContext.CreateDbSetMock(c => c.Countries, _countries);
             mockContext.CreateDbSetMock(c => c.People, _people);
 
-            _countriesService = new CountriesService(mockContext.Object);
             _peopleService = new PeopleService(mockContext.Object);
             _outputHelper = outputHelper;
+            _fixture = new Fixture();
 
-            PrepareTestData().Wait();
+            int n = 0;
+            Func<string> nameFactory = () => $"joel_{n++}";
+
+            _validPersonAddRequests = _fixture
+                .Build<PersonAddRequest>()
+                .With(r => r.Name, nameFactory)
+                .With(r => r.Email,"someone@example.com")
+                .CreateMany()
+                .ToArray();
         }
 
         #region AddPerson
@@ -47,10 +56,10 @@ namespace Tests
         [Fact]
         public async Task AddPerson_NullName()
         {
-            PersonAddRequest request = new PersonAddRequest()
-            {
-                Name = null
-            };
+            PersonAddRequest request = _fixture
+                .Build <PersonAddRequest>()
+                .With(p => p.Name, null as string)
+                .Create();
 
             await Assert.ThrowsAsync<ArgumentException>(async () =>
             {
@@ -85,7 +94,7 @@ namespace Tests
         [Fact]
         public async Task GetPersonById_ValidId() 
         {
-            PersonAddRequest personRequest = _validPersonAddRequests[0];
+            PersonAddRequest personRequest = _validPersonAddRequests.First();
             PersonResponse? responseFromAdd = await _peopleService.AddPerson(personRequest);
             PersonResponse? responseFromGet = await _peopleService.GetPersonById(responseFromAdd.PersonId);
 
@@ -170,18 +179,19 @@ namespace Tests
                 peopleFromAdd.Add(response);
             }
 
-            PrintExpectedElements(peopleFromAdd.Where(p => p.Name!.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
+            IEnumerable<PersonResponse> expectedPeople = peopleFromAdd.Where(p => p.Name!.Contains(searchText, StringComparison.OrdinalIgnoreCase));
 
-            IEnumerable<PersonResponse> people = await _peopleService.SearchPeople((nameof(PersonResponse.Name)), searchText);
+            PrintExpectedElements(expectedPeople);
 
-            PrintActualElements(people);
+            Assert.True(expectedPeople.Any());
 
-            foreach (PersonResponse person in peopleFromAdd)
+            IEnumerable<PersonResponse> actualPeople = await _peopleService.SearchPeople((nameof(PersonResponse.Name)), searchText);
+
+            PrintActualElements(actualPeople);
+
+            foreach (PersonResponse person in expectedPeople)
             {
-                if (person.Name!.Contains(searchText, StringComparison.OrdinalIgnoreCase)) 
-                {
-                    Assert.Contains(person, people);
-                }
+                Assert.Contains(person, actualPeople);
             }
         }
 
@@ -235,10 +245,10 @@ namespace Tests
         [Fact]
         public async Task UpdatePerson_InvalidId()
         {
-            PersonUpdateRequest request = new PersonUpdateRequest()
-            {
-                PersonId = Guid.NewGuid()
-            };
+            PersonUpdateRequest request = _fixture
+                .Build<PersonUpdateRequest>()
+                .With(p => p.PersonId, Guid.NewGuid())
+                .Create();
 
             await Assert.ThrowsAsync<ArgumentException>(async () =>
             {
@@ -327,7 +337,7 @@ namespace Tests
         [Fact]
         public async Task DeletePerson_ValidId()
         {
-            PersonResponse person = await _peopleService.AddPerson(_validPersonAddRequests[0]);
+            PersonResponse person = await _peopleService.AddPerson(_validPersonAddRequests.First());
             bool deleted = await _peopleService.DeletePerson(person.PersonId);
             IEnumerable<PersonResponse> people = await _peopleService.GetAllPersons();
 
@@ -338,53 +348,6 @@ namespace Tests
         #endregion
 
         #region Helpers
-
-        private async Task PrepareTestData()
-        {
-            CountryAddRequest countryRequest1 = new CountryAddRequest()
-            {
-                CountryName = "Germany"
-            };
-            CountryAddRequest countryRequest2 = new CountryAddRequest()
-            {
-                CountryName = "England"
-            };
-            CountryResponse countryResponse1 = await _countriesService.AddCountry(countryRequest1);
-            CountryResponse countryResponse2 = await _countriesService.AddCountry(countryRequest2);
-
-            _validPersonAddRequests = new PersonAddRequest[]
-            {
-                new PersonAddRequest()
-                {
-                    Name = "Joe",
-                    Email = "dummy@example.com",
-                    Address = "Sample street",
-                    Gender = GenderOptions.Male,
-                    CountryId = countryResponse1.CountryId,
-                    DateOfBirth = DateTime.Parse("2001-01-01"),
-                    ReceiveNewsLetters = true,
-                },
-                new PersonAddRequest()
-                {
-                    Name = "Smith",
-                    Email = "something@example.com",
-                    Gender = GenderOptions.Female,
-                    CountryId = countryResponse2.CountryId,
-                    Address = "SomeAddress",
-                    DateOfBirth = DateTime.Parse("2002-02-02")
-                },
-                new PersonAddRequest()
-                {
-                    Name = "Joseph",
-                    Email = "josh@example.com",
-                    Gender = GenderOptions.Other,
-                    CountryId = countryResponse2.CountryId,
-                    Address = "DummyAddress",
-                    DateOfBirth = DateTime.Parse("2012-04-04")
-                },
-
-            };
-        }
 
         private void PrintExpectedElements(IEnumerable<object> expectedElements)
         {

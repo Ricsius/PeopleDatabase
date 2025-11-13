@@ -1,4 +1,6 @@
 ﻿using Entities;
+using EntityFrameworkCoreMock;
+using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -18,10 +20,14 @@ namespace Tests
 
         public PeopleServiceTests(ITestOutputHelper outputHelper)
         {
-            PeopleDbContext mockContext = TestHelper.CreateMockPeopleDbContext(_countries, _people);
+            DbContextOptions options = new DbContextOptionsBuilder<PeopleDbContext>().Options;
+            DbContextMock<PeopleDbContext> mockContext = new DbContextMock<PeopleDbContext>(options);
 
-            _countriesService = new CountriesService(mockContext);
-            _peopleService = new PeopleService(mockContext);
+            mockContext.CreateDbSetMock(c => c.Countries, _countries);
+            mockContext.CreateDbSetMock(c => c.People, _people);
+
+            _countriesService = new CountriesService(mockContext.Object);
+            _peopleService = new PeopleService(mockContext.Object);
             _outputHelper = outputHelper;
 
             PrepareTestData().Wait();

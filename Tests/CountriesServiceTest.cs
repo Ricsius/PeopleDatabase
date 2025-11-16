@@ -1,5 +1,6 @@
 ﻿using Entities;
 using EntityFrameworkCoreMock;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
@@ -27,10 +28,12 @@ namespace Tests
         [Fact]
         public async Task AddCountry_NullCountry()
         {
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => 
+            Func<Task> action = async () =>
             {
                 await _countriesService.AddCountry(null);
-            });            
+            };
+
+            await action.Should().ThrowAsync<ArgumentNullException>();     
         }
 
         [Fact]
@@ -41,10 +44,12 @@ namespace Tests
                 CountryName = null
             };
 
-            await Assert.ThrowsAsync<ArgumentException>(async () =>
+            Func<Task> action = async () =>
             {
                 await _countriesService.AddCountry(request);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
         }
 
         [Fact]
@@ -60,11 +65,13 @@ namespace Tests
                 CountryName = "USA"
             };
 
-            await Assert.ThrowsAsync<ArgumentException>(async () =>
+            Func<Task> action = async () =>
             {
                 await _countriesService.AddCountry(request1);
                 await _countriesService.AddCountry(request2);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
         }
 
         [Fact]
@@ -79,8 +86,8 @@ namespace Tests
 
             IEnumerable<CountryResponse> countries = await _countriesService.GetAllCountries();
 
-            Assert.True(response.CountryId != Guid.Empty);
-            Assert.Contains(response, countries);
+            response.CountryId.Should().NotBe(Guid.Empty);
+            countries.Should().Contain(response);
         }
 
         #endregion
@@ -92,7 +99,7 @@ namespace Tests
         {
             IEnumerable<CountryResponse> countries = await _countriesService.GetAllCountries();
 
-            Assert.Empty(countries);
+            countries.Should().BeEmpty();
         }
 
         [Fact]
@@ -116,10 +123,7 @@ namespace Tests
 
             IEnumerable<CountryResponse> countries = await _countriesService.GetAllCountries();
 
-            foreach (CountryResponse country in countries)
-            {
-                Assert.Contains(country, expectedCountries);
-            }
+            countries.Should().BeEquivalentTo(expectedCountries);
         }
 
         #endregion
@@ -129,10 +133,12 @@ namespace Tests
         [Fact]
         public async Task GetCountryByCountryId_NullId() 
         {
-            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            Func<Task> action = async () =>
             {
                 await _countriesService.GetCountryById(null);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -146,7 +152,7 @@ namespace Tests
             CountryResponse response = await _countriesService.AddCountry(request);
             CountryResponse? foundCountry = await _countriesService.GetCountryById(response.CountryId);
 
-            Assert.Equal(response, foundCountry);
+            foundCountry.Should().Be(response);
         }
 
         #endregion

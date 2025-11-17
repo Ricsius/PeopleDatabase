@@ -2,6 +2,8 @@ using ServiceContracts;
 using Services;
 using Entities;
 using Microsoft.EntityFrameworkCore;
+using RepositoryContracts;
+using Repositories;
 
 namespace PeopleDatabase
 {
@@ -11,6 +13,8 @@ namespace PeopleDatabase
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+            builder.Services.AddScoped<IPeopleRepository, PeopleRepository>();
             builder.Services.AddScoped<ICountriesService, CountriesService>();
             builder.Services.AddScoped<IPeopleService, PeopleService>();
             builder.Services.AddDbContext<PeopleDbContext>(options => 

@@ -1,7 +1,6 @@
 ﻿using Entities;
-using EntityFrameworkCoreMock;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using RepositoryContracts;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using Services;
@@ -15,12 +14,9 @@ namespace Tests
 
         public CountriesServiceTest() 
         {
-            DbContextOptions options = new DbContextOptionsBuilder<PeopleDbContext>().Options;
-            DbContextMock<PeopleDbContext> mockContext = new DbContextMock<PeopleDbContext>(options);
-
-            mockContext.CreateDbSetMock(c => c.Countries, _countries);
+            ICountriesRepository mockRepository = TestHelper.CreateMockCountriesRepository(_countries);
             
-            _countriesService = new CountriesService(mockContext.Object);
+            _countriesService = new CountriesService(mockRepository);
         }
 
         #region AddCountry

@@ -1,8 +1,7 @@
 ﻿using AutoFixture;
 using Entities;
-using EntityFrameworkCoreMock;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using RepositoryContracts;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -17,18 +16,13 @@ namespace Tests
         private PersonAddRequest[] _validPersonAddRequests;
         private readonly IFixture _fixture;
         private readonly ITestOutputHelper _outputHelper;
-        private readonly List<Country> _countries = new List<Country>();
         private readonly List<Person> _people = new List<Person>();
 
         public PeopleServiceTests(ITestOutputHelper outputHelper)
         {
-            DbContextOptions options = new DbContextOptionsBuilder<PeopleDbContext>().Options;
-            DbContextMock<PeopleDbContext> mockContext = new DbContextMock<PeopleDbContext>(options);
+            IPeopleRepository mockRepository = TestHelper.CreateMockPeopleRepository(_people);
 
-            mockContext.CreateDbSetMock(c => c.Countries, _countries);
-            mockContext.CreateDbSetMock(c => c.People, _people);
-
-            _peopleService = new PeopleService(mockContext.Object);
+            _peopleService = new PeopleService(mockRepository);
             _outputHelper = outputHelper;
             _fixture = new Fixture();
 

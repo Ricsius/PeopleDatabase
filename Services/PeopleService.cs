@@ -1,23 +1,25 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Entities;
-using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using RepositoryContracts;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using Services.Helpers;
 using System.Globalization;
+using System.Linq.Expressions;
+using System.Data.SqlClient;
 
 namespace Services
 {
     public class PeopleService : IPeopleService
     {
-        private readonly PeopleDbContext _database;
+        private readonly IPeopleRepository _repository;
 
-        public PeopleService(PeopleDbContext database) 
+        public PeopleService(IPeopleRepository repository)
         {
-            _database = database;
+            _repository = repository;
 
             ExcelPackage.License.SetNonCommercialPersonal("Placeholder");
         }
@@ -35,8 +37,7 @@ namespace Services
             person.Id = Guid.NewGuid();
 
             //_database.Sp_InsertPerson(person);
-            _database.People.Add(person);
-            await _database.SaveChangesAsync();
+            await _repository.AddPerson(person);
 
             PersonResponse response = person.ToPersonResponse();
 
@@ -52,8 +53,7 @@ namespace Services
 
             ValidationHelper.ModelValidation(request);
 
-            Person? person = await _database.People
-                .FirstOrDefaultAsync(p => p.Id == request.PersonId);
+            Person? person = await _repository.GetPersonById(request.PersonId);
 
             if (person == null)
             {
@@ -68,9 +68,9 @@ namespace Services
             person.Address = request.Address;
             person.ReceiveNewsLetters = request.ReceiveNewsLetters;
 
-            await _database.SaveChangesAsync();
+            Person? updatedPerson = await _repository.UpdatePerson(person);
 
-            return person.ToPersonResponse();
+            return updatedPerson!.ToPersonResponse();
         }
 
         public async Task<bool> DeletePerson(Guid? id)
@@ -79,30 +79,16 @@ namespace Services
             {
                 throw new ArgumentNullException(nameof(id));
             }
-            Person? personToDelete = await _database.People
-                .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (personToDelete == null)
-            {
-                return false;
-            }
-
-            _database.People.Remove(personToDelete);
-            await _database.SaveChangesAsync();
-
-            return true;
+            return await _repository.DeletePersonById(id.Value);
         }
 
         public async Task<IEnumerable<PersonResponse>> GetAllPersons()
         {
             //Person[] people = _database.Sp_GetAllPeople();
-            IEnumerable<Person> people = await _database.People
-                .Include(nameof(Person.Country))
-                .ToArrayAsync();
+            IEnumerable<Person> people = await _repository.GetAllPersons();
 
-            return people
-                .Select(p => p.ToPersonResponse())
-                .ToArray();
+            return people.Select(p => p.ToPersonResponse());
         }
 
         public async Task<PersonResponse?> GetPersonById(Guid? id)
@@ -112,72 +98,65 @@ namespace Services
                 throw new ArgumentNullException(nameof(id));
             }
 
-            Person? person = await _database.People
-                .Include(nameof(Person.Country))
-                .FirstOrDefaultAsync(p => p.Id == id);
-            PersonResponse? response = person != null 
-                ? person.ToPersonResponse()
-                : null;
+            Person? person = await _repository.GetPersonById(id.Value);
 
-            return response;
+            return person?.ToPersonResponse();
         }
 
         public async Task<IEnumerable<PersonResponse>> SearchPeople(string? searchBy, string? searchString)
         {
-            IEnumerable<PersonResponse> people = await GetAllPersons();
-            IEnumerable<PersonResponse> matchingPeople;
+            Expression<Func<Person, bool>> predicate;
 
             if (string.IsNullOrEmpty(searchBy) || string.IsNullOrEmpty(searchString))
             {
-                return people;
+                predicate = p => true;
             }
-
-            switch (searchBy)
+            else
             {
-                case nameof(PersonResponse.Name):
-                    matchingPeople = people
-                        .Where(p => !string.IsNullOrEmpty(p.Name)
-                        ? p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-                        : true);
-                    break;
+                if (searchBy == nameof(PersonResponse.DateOfBirth)) 
+                {
+                    IEnumerable<Person> people = (await _repository.GetAllPersons()).ToArray();
+                    
+                    return people
+                        .Where(p => p.DateOfBirth.ToString("yyyy MM dd").Contains(searchString))
+                        .Select(p => p.ToPersonResponse());
+                }
 
-                case nameof(PersonResponse.Email):
-                    matchingPeople = people
-                        .Where(p => !string.IsNullOrEmpty(p.Email)
-                        ? p.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-                        : true);
-                    break;
+                predicate = searchBy switch
+                {
+                    nameof(PersonResponse.Name) =>
+                    p => !string.IsNullOrEmpty(p.Name)
+                            ? p.Name.Contains(searchString!)
+                            : false,
 
-                case nameof(PersonResponse.DateOfBirth):
-                    matchingPeople = people
-                        .Where(p => p.DateOfBirth.ToString("dd MMMM yyyy").Contains(searchString, StringComparison.OrdinalIgnoreCase));
-                    break;
+                    nameof(PersonResponse.Email) =>
+                    p => !string.IsNullOrEmpty(p.Email)
+                        ? p.Email.Contains(searchString!)
+                        : false,
 
-                case nameof(PersonResponse.Gender):
-                    matchingPeople = people
-                        .Where(p => !string.IsNullOrEmpty(p.Gender)
-                        ? p.Gender.Equals(searchString, StringComparison.OrdinalIgnoreCase)
-                        : true);
-                    break;
+                    nameof(PersonResponse.Gender) =>
+                        p => !string.IsNullOrEmpty(p.Gender)
+                            ? p.Gender.Equals(searchString!)
+                            : false,
 
-                case nameof(PersonResponse.CountryName):
-                    matchingPeople = people
-                        .Where(p => !string.IsNullOrEmpty(p.CountryName)
-                        ? p.CountryName.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-                        : true);
-                    break;
+                    nameof(PersonResponse.CountryName) =>
+                        p => !string.IsNullOrEmpty(p.Country!.Name)
+                            ? p.Country.Name.Contains(searchString!)
+                            : false,
 
-                case nameof(PersonResponse.Address):
-                    matchingPeople = people
-                        .Where(p => !string.IsNullOrEmpty(p.Address)
-                        ? p.Address.Contains(searchString, StringComparison.OrdinalIgnoreCase)
-                        : true);
-                    break;
+                    nameof(PersonResponse.Address) =>
+                        p => !string.IsNullOrEmpty(p.Address)
+                            ? p.Address.Contains(searchString!)
+                            : false,
 
-                default:
-                    matchingPeople = people;
-                    break;
+                    _ =>
+                    p => true,
+                };
             }
+
+            IEnumerable<Person> foundPeople = await _repository.SearchPeople(predicate);
+            IEnumerable<PersonResponse> matchingPeople = foundPeople
+                    .Select(p => p.ToPersonResponse());
 
             return matchingPeople;
         }
@@ -271,11 +250,11 @@ namespace Services
             return stream;
         }
 
-        public async Task<MemoryStream> GetPeopleExcel() 
+        public async Task<MemoryStream> GetPeopleExcel()
         {
             MemoryStream stream = new MemoryStream();
 
-            using (ExcelPackage excelPackage = new ExcelPackage(stream)) 
+            using (ExcelPackage excelPackage = new ExcelPackage(stream))
             {
                 ExcelWorksheet workSheet = excelPackage.Workbook.Worksheets.Add("PeopleSheet");
 
@@ -288,13 +267,13 @@ namespace Services
                 workSheet.Cells["G1"].Value = nameof(PersonResponse.Address);
                 workSheet.Cells["H1"].Value = nameof(PersonResponse.ReceiveNewsLetters);
 
-                using (ExcelRange headerCells = workSheet.Cells["A1:H1"]) 
-                { 
+                using (ExcelRange headerCells = workSheet.Cells["A1:H1"])
+                {
                     headerCells.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     headerCells.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
                     headerCells.Style.Font.Bold = true;
                 }
-                
+
                 int row = 2;
                 IEnumerable<PersonResponse> people = await GetAllPersons();
 
@@ -316,7 +295,7 @@ namespace Services
 
                 await excelPackage.SaveAsync();
             }
-            
+
             stream.Position = 0;
 
             return stream;

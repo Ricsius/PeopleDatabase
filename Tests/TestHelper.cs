@@ -1,51 +1,84 @@
 ﻿using Entities;
-using Microsoft.EntityFrameworkCore;
 using Moq;
+using RepositoryContracts;
+using System.Linq.Expressions;
 
 namespace Tests
 {
     internal static class TestHelper
     {
-        public static PeopleDbContext CreateMockPeopleDbContext(ICollection<Country> countryCollection, ICollection<Person> personCollection)
+        public static ICountriesRepository CreateMockCountriesRepository(ICollection<Country> countriesCollection)
         {
-            DbSet<Country> countriesSet = CreateMockCountryDbSet(countryCollection);
-            DbSet<Person> peopleSet = CreateMockPersonDbSet(personCollection);
-            DbContextOptions options = new DbContextOptionsBuilder<PeopleDbContext>().Options;
-            Mock<PeopleDbContext> mockContext = new Mock<PeopleDbContext>(options);
+            Mock<ICountriesRepository> repositoryMock = new Mock<ICountriesRepository>();
 
-            mockContext.Setup(m => m.Countries).Returns(countriesSet);
-            mockContext.Setup(m => m.People).Returns(peopleSet);
-            mockContext.Setup(m => m.Sp_GetAllPeople()).Returns(() => personCollection.ToArray());
-            mockContext.Setup(m => m.Sp_InsertPerson(It.IsAny<Person>())).Callback<Person>(p => personCollection.Add(p));
+            repositoryMock
+                .Setup(r => r.GetAllCountries())
+                .ReturnsAsync(() => countriesCollection.ToArray());
 
-            return mockContext.Object;
+            repositoryMock
+                .Setup(r => r.GetCountryById(It.IsAny<Guid>()))
+                .ReturnsAsync((Guid id) => countriesCollection.FirstOrDefault(c => c.Id == id));
+
+            repositoryMock
+                .Setup(r => r.GetCountryByName(It.IsAny<string>()))
+                .ReturnsAsync((string name) => countriesCollection.FirstOrDefault(c => c.Name == name)); ;
+
+            repositoryMock
+                .Setup(r => r.AddCountry(It.IsAny<Country>()))
+                .ReturnsAsync((Country c) => 
+                {
+                    countriesCollection.Add(c);
+
+                    return c;
+                });
+
+            return repositoryMock.Object;
         }
 
-        private static DbSet<Country> CreateMockCountryDbSet(ICollection<Country> countryCollection)
+        public static IPeopleRepository CreateMockPeopleRepository(ICollection<Person> personCollection)
         {
-            IQueryable<Country> queryable = countryCollection.AsQueryable();
-            Mock<DbSet<Country>> mockCountriesSet = new Mock<DbSet<Country>>();
-            mockCountriesSet.Setup(m => m.Add(It.IsAny<Country>())).Callback<Country>(c => countryCollection.Add(c));
-            mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.Expression).Returns(queryable.Expression);
-            mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.Provider).Returns(queryable.Provider);
-            mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            mockCountriesSet.As<IQueryable<Country>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
+            Mock<IPeopleRepository> repositoryMock = new Mock<IPeopleRepository>();
 
-            return mockCountriesSet.Object;
-        }
+            repositoryMock
+                .Setup(r => r.GetAllPersons())
+                .ReturnsAsync(() => personCollection.ToArray());
 
-        private static DbSet<Person> CreateMockPersonDbSet(ICollection<Person> personCollection)
-        {
-            IQueryable<Person> queryable = personCollection.AsQueryable();
-            Mock<DbSet<Person>> mockPeopleSet = new Mock<DbSet<Person>>();
-            mockPeopleSet.Setup(m => m.Add(It.IsAny<Person>())).Callback<Person>(c => personCollection.Add(c));
-            mockPeopleSet.Setup(m => m.Remove(It.IsAny<Person>())).Callback<Person>(c => personCollection.Remove(c));
-            mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.Expression).Returns(queryable.Expression);
-            mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.Provider).Returns(queryable.Provider);
-            mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            mockPeopleSet.As<IQueryable<Person>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
+            repositoryMock
+                .Setup(r => r.GetPersonById(It.IsAny<Guid>()))
+                .ReturnsAsync((Guid id) => personCollection.FirstOrDefault(p => p.Id == id));
 
-            return mockPeopleSet.Object;
+            repositoryMock
+                .Setup(r => r.SearchPeople(It.IsAny<Expression<Func<Person, bool>>>()))
+                .ReturnsAsync((Expression<Func<Person, bool>> e) => personCollection.AsQueryable().Where(e));
+
+            repositoryMock
+                .Setup(r => r.AddPerson(It.IsAny<Person>()))
+                .ReturnsAsync((Person p) => 
+            {
+                personCollection.Add(p);
+
+                return p;
+            });
+
+            repositoryMock
+                .Setup(r => r.DeletePersonById(It.IsAny<Guid>()))
+                .ReturnsAsync((Guid id) => 
+                {
+                    Person? foundPerson = personCollection.FirstOrDefault(p => p.Id == id);
+
+                    if (foundPerson != null)
+                    {
+                        return personCollection.Remove(foundPerson);
+                    }
+
+                    return false;
+                });
+
+            repositoryMock
+                .Setup(r => r.UpdatePerson(It.IsAny<Person>()))
+                .ReturnsAsync((Person p) => p);
+
+            return repositoryMock.Object;
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using Entities;
 using Moq;
 using RepositoryContracts;
+using ServiceContracts;
+using ServiceContracts.DTO;
+using ServiceContracts.Enums;
 using System.Linq.Expressions;
 
 namespace Tests
@@ -79,6 +82,36 @@ namespace Tests
                 .ReturnsAsync((Person p) => p);
 
             return repositoryMock.Object;
+        }
+
+        public static ICountriesService CreateMockCountriesService(IEnumerable<CountryResponse> responseCollection)
+        { 
+            Mock<ICountriesService> serviceMock = new Mock<ICountriesService>();
+
+            serviceMock
+                .Setup(s => s.GetAllCountries())
+                .ReturnsAsync(responseCollection);
+
+            return serviceMock.Object;
+        }
+
+        public static IPeopleService CreateMockPeopleService(IEnumerable<PersonResponse> responseCollection)
+        {
+            Mock<IPeopleService> serviceMock = new Mock<IPeopleService>();
+
+            serviceMock
+                .Setup(s => s.SearchPeople(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(responseCollection);
+
+            serviceMock
+                .Setup(s => s.GetSortedPeople(It.IsAny<IEnumerable<PersonResponse>>(), It.IsAny<string>(), It.IsAny<SortOrderOptions>()))
+                .ReturnsAsync(responseCollection);
+
+            serviceMock
+                .Setup(s => s.AddPerson(It.IsAny<PersonAddRequest>()))
+                .ReturnsAsync(responseCollection.First());
+
+            return serviceMock.Object;
         }
     }
 }

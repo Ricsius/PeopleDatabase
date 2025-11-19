@@ -17,11 +17,15 @@ namespace PeopleDatabase
             builder.Services.AddScoped<IPeopleRepository, PeopleRepository>();
             builder.Services.AddScoped<ICountriesService, CountriesService>();
             builder.Services.AddScoped<IPeopleService, PeopleService>();
-            builder.Services.AddDbContext<PeopleDbContext>(options => 
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
-            });
 
+            if (!builder.Environment.IsEnvironment("Test"))
+            {
+                builder.Services.AddDbContext<PeopleDbContext>(options =>
+                {
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+                });
+            }
+            
             var app = builder.Build();
 
             if (builder.Environment.IsDevelopment())
@@ -29,7 +33,10 @@ namespace PeopleDatabase
                 app.UseDeveloperExceptionPage();
             }
 
-            Rotativa.AspNetCore.RotativaConfiguration.Setup("wwwroot", "Rotativa");
+            if (!builder.Environment.IsEnvironment("Test"))
+            {
+                Rotativa.AspNetCore.RotativaConfiguration.Setup("wwwroot", "Rotativa");
+            }
 
             app.UseStaticFiles();
             app.UseRouting();

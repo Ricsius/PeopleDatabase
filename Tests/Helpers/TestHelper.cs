@@ -6,7 +6,7 @@ using ServiceContracts.DTO;
 using ServiceContracts.Enums;
 using System.Linq.Expressions;
 
-namespace Tests
+namespace Tests.Helpers
 {
     internal static class TestHelper
     {

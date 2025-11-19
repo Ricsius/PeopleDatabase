@@ -5,6 +5,7 @@ using PeopleDatabase.Controllers;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
+using Tests.Helpers;
 
 namespace Tests
 {

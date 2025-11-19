@@ -4,6 +4,7 @@ using RepositoryContracts;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using Services;
+using Tests.Helpers;
 
 namespace Tests
 {

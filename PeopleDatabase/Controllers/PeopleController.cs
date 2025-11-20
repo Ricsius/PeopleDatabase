@@ -12,11 +12,13 @@ namespace PeopleDatabase.Controllers
     {
         private readonly IPeopleService _peopleService;
         private readonly ICountriesService _countriesService;
+        private readonly ILogger<PeopleController> _logger;
 
-        public PeopleController(IPeopleService peopleService, ICountriesService countriesService)
+        public PeopleController(IPeopleService peopleService, ICountriesService countriesService, ILogger<PeopleController> logger)
         {
             _peopleService = peopleService;
             _countriesService = countriesService;
+            _logger = logger;
         }
 
         [Route("[action]")]
@@ -27,6 +29,9 @@ namespace PeopleDatabase.Controllers
             string sortby = nameof(PersonResponse.Name),
             SortOrderOptions sortOrder = SortOrderOptions.Ascending)
         {
+            _logger.LogInformation($"{nameof(Index)} action of {nameof(PeopleController)}");
+            _logger.LogDebug(@$"{nameof(searchBy)}: {searchBy}, {nameof(searchString)}: {searchString}, {nameof(sortby)}: {sortby}, {nameof(sortOrder)}: {sortOrder}");
+
             ViewBag.SearchFields = new Dictionary<string, string>()
             {
                 { nameof(PersonResponse.Name), "Name" },
@@ -54,6 +59,8 @@ namespace PeopleDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+            _logger.LogInformation($"{nameof(Create)} GET action of {nameof(PeopleController)}");
+
             await CountriesDropdownSetup();
 
             return View();
@@ -63,6 +70,8 @@ namespace PeopleDatabase.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(PersonAddRequest request)
         {
+            _logger.LogInformation($"{nameof(Create)} POST action of {nameof(PeopleController)}");
+
             if (!ModelState.IsValid)
             {
                 await CountriesDropdownSetup();
@@ -84,6 +93,8 @@ namespace PeopleDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid personId)
         {
+            _logger.LogInformation($"{nameof(Edit)} GET action of {nameof(PeopleController)}");
+
             PersonResponse? response = await _peopleService.GetPersonById(personId);
 
             if (response == null)
@@ -102,6 +113,7 @@ namespace PeopleDatabase.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(PersonUpdateRequest request)
         {
+            _logger.LogInformation($"{nameof(Edit)} POST action of {nameof(PeopleController)}");
 
             PersonResponse? personResponse = await _peopleService.GetPersonById(request.PersonId);
 
@@ -131,6 +143,8 @@ namespace PeopleDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(Guid personId)
         {
+            _logger.LogInformation($"{nameof(Delete)} GET action of {nameof(PeopleController)}");
+
             PersonResponse? response = await _peopleService.GetPersonById(personId);
 
             if (response == null)
@@ -145,6 +159,8 @@ namespace PeopleDatabase.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(PersonResponse person)
         {
+            _logger.LogInformation($"{nameof(Delete)} POST action of {nameof(PeopleController)}");
+
             PersonResponse? response = await _peopleService.GetPersonById(person.PersonId);
 
             if (response == null)
@@ -161,6 +177,8 @@ namespace PeopleDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> PeoplePdf() 
         {
+            _logger.LogInformation($"{nameof(PeoplePdf)} action of {nameof(PeopleController)}");
+
             IEnumerable<PersonResponse> people = await _peopleService.GetAllPersons();
             ViewAsPdf view = new ViewAsPdf(nameof(PeoplePdf), people, ViewData)
             {
@@ -181,6 +199,8 @@ namespace PeopleDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> PeopleCsv()
         {
+            _logger.LogInformation($"{nameof(PeopleCsv)} action of {nameof(PeopleController)}");
+
             MemoryStream stream = await _peopleService.GetPeopleCsv();
 
             return File(stream, "application/octet-stream", "people.csv");
@@ -190,6 +210,8 @@ namespace PeopleDatabase.Controllers
         [HttpGet]
         public async Task<IActionResult> PeopleExcel()
         {
+            _logger.LogInformation($"{nameof(PeopleExcel)} action of {nameof(PeopleController)}");
+
             MemoryStream stream = await _peopleService.GetPeopleExcel();
 
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "people.xlsx");

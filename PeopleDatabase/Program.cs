@@ -12,6 +12,15 @@ namespace PeopleDatabase
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            /*
+            //Logging
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
+            builder.Logging.AddEventLog();
+            */
+
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
             builder.Services.AddScoped<IPeopleRepository, PeopleRepository>();
@@ -27,7 +36,7 @@ namespace PeopleDatabase
             }
             
             var app = builder.Build();
-
+            
             if (builder.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

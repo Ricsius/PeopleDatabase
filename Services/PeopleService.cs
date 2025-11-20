@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using Entities;
+using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 using RepositoryContracts;
 using ServiceContracts;
@@ -9,23 +10,26 @@ using ServiceContracts.Enums;
 using Services.Helpers;
 using System.Globalization;
 using System.Linq.Expressions;
-using System.Data.SqlClient;
 
 namespace Services
 {
     public class PeopleService : IPeopleService
     {
         private readonly IPeopleRepository _repository;
+        private readonly ILogger<PeopleService> _logger;
 
-        public PeopleService(IPeopleRepository repository)
+        public PeopleService(IPeopleRepository repository, ILogger<PeopleService> logger)
         {
             _repository = repository;
+            _logger = logger;
 
             ExcelPackage.License.SetNonCommercialPersonal("Placeholder");
         }
 
         public async Task<PersonResponse> AddPerson(PersonAddRequest? request)
         {
+            _logger.LogInformation($"{nameof(AddPerson)} of {nameof(PeopleService)} called");
+
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
@@ -46,6 +50,8 @@ namespace Services
 
         public async Task<PersonResponse> UpdatePerson(PersonUpdateRequest? request)
         {
+            _logger.LogInformation($"{nameof(UpdatePerson)} of {nameof(PeopleService)} called");
+
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
@@ -75,6 +81,8 @@ namespace Services
 
         public async Task<bool> DeletePerson(Guid? id)
         {
+            _logger.LogInformation($"{nameof(DeletePerson)} of {nameof(PeopleService)} called");
+
             if (id == null)
             {
                 throw new ArgumentNullException(nameof(id));
@@ -85,6 +93,8 @@ namespace Services
 
         public async Task<IEnumerable<PersonResponse>> GetAllPersons()
         {
+            _logger.LogInformation($"{nameof(GetAllPersons)} of {nameof(PeopleService)} called");
+
             //Person[] people = _database.Sp_GetAllPeople();
             IEnumerable<Person> people = await _repository.GetAllPersons();
 
@@ -93,6 +103,8 @@ namespace Services
 
         public async Task<PersonResponse?> GetPersonById(Guid? id)
         {
+            _logger.LogInformation($"{nameof(GetPersonById)} of {nameof(PeopleService)} called");
+
             if (id == null)
             {
                 throw new ArgumentNullException(nameof(id));
@@ -105,6 +117,8 @@ namespace Services
 
         public async Task<IEnumerable<PersonResponse>> SearchPeople(string? searchBy, string? searchString)
         {
+            _logger.LogInformation($"{nameof(SearchPeople)} of {nameof(PeopleService)} called");
+
             Expression<Func<Person, bool>> predicate;
 
             if (string.IsNullOrEmpty(searchBy) || string.IsNullOrEmpty(searchString))
@@ -163,6 +177,8 @@ namespace Services
 
         public async Task<IEnumerable<PersonResponse>> GetSortedPeople(IEnumerable<PersonResponse> people, string sortBy, SortOrderOptions sortOrder)
         {
+            _logger.LogInformation($"{nameof(GetSortedPeople)} of {nameof(PeopleService)} called");
+
             IEnumerable<PersonResponse> sortedPeople;
 
             if (string.IsNullOrEmpty(sortBy))
@@ -211,6 +227,8 @@ namespace Services
 
         public async Task<MemoryStream> GetPeopleCsv()
         {
+            _logger.LogInformation($"{nameof(GetPeopleCsv)} of {nameof(PeopleService)} called");
+
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
             IEnumerable<PersonResponse> people = await GetAllPersons();
             MemoryStream stream = new MemoryStream();
@@ -252,6 +270,8 @@ namespace Services
 
         public async Task<MemoryStream> GetPeopleExcel()
         {
+            _logger.LogInformation($"{nameof(GetPeopleExcel)} of {nameof(PeopleService)} called");
+
             MemoryStream stream = new MemoryStream();
 
             using (ExcelPackage excelPackage = new ExcelPackage(stream))

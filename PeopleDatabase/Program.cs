@@ -4,6 +4,7 @@ using Entities;
 using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 using Repositories;
+using Serilog;
 
 namespace PeopleDatabase
 {
@@ -20,6 +21,14 @@ namespace PeopleDatabase
             builder.Logging.AddDebug();
             builder.Logging.AddEventLog();
             */
+
+            //Serilog
+            builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider serviceProvider, LoggerConfiguration configuration) => 
+            {
+                configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(serviceProvider);
+            });
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();

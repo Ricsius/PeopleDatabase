@@ -26,6 +26,11 @@ namespace PeopleDatabase
             builder.Services.AddScoped<IPeopleRepository, PeopleRepository>();
             builder.Services.AddScoped<ICountriesService, CountriesService>();
             builder.Services.AddScoped<IPeopleService, PeopleService>();
+            builder.Services.AddHttpLogging(options => 
+            {
+                options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestProperties
+                | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponsePropertiesAndHeaders;
+            });
 
             if (!builder.Environment.IsEnvironment("Test"))
             {
@@ -37,6 +42,8 @@ namespace PeopleDatabase
             
             var app = builder.Build();
             
+            app.UseHttpLogging();
+
             if (builder.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

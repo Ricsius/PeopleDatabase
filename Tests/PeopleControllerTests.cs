@@ -1,6 +1,8 @@
 ﻿using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 using PeopleDatabase.Controllers;
 using ServiceContracts;
 using ServiceContracts.DTO;
@@ -17,6 +19,7 @@ namespace Tests
         private readonly IEnumerable<CountryResponse> _countries;
         private readonly IEnumerable<PersonResponse> _responses;
         private readonly PeopleController _controller;
+        private readonly Mock<ILogger<PeopleController>> loggerMock = new Mock<ILogger<PeopleController>>();
 
         public PeopleControllerTests() 
         {
@@ -25,7 +28,7 @@ namespace Tests
             _responses = _fixture.CreateMany<PersonResponse>();
             _countriesService = TestHelper.CreateMockCountriesService(_countries);
             _peopleService = TestHelper.CreateMockPeopleService(_responses);
-            _controller = new PeopleController(_peopleService, _countriesService);
+            _controller = new PeopleController(_peopleService, _countriesService, loggerMock.Object);
         }
 
         #region Index

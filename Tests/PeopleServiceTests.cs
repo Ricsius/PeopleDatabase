@@ -1,6 +1,8 @@
 ﻿using AutoFixture;
 using Entities;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
 using RepositoryContracts;
 using ServiceContracts;
 using ServiceContracts.DTO;
@@ -18,12 +20,13 @@ namespace Tests
         private readonly IFixture _fixture;
         private readonly ITestOutputHelper _outputHelper;
         private readonly List<Person> _people = new List<Person>();
+        private readonly Mock<ILogger<PeopleService>> loggerMock = new Mock<ILogger<PeopleService>>();
 
         public PeopleServiceTests(ITestOutputHelper outputHelper)
         {
             IPeopleRepository mockRepository = TestHelper.CreateMockPeopleRepository(_people);
 
-            _peopleService = new PeopleService(mockRepository);
+            _peopleService = new PeopleService(mockRepository, loggerMock.Object);
             _outputHelper = outputHelper;
             _fixture = new Fixture();
 

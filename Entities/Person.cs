@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 
 namespace Entities
 {
@@ -33,5 +34,22 @@ namespace Entities
 
         [ForeignKey(nameof(CountryId))]
         public Country? Country { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append($"Id: {Id}, ");
+            stringBuilder.Append($"Name: {Name}, ");
+            stringBuilder.Append($"Email: {Email}, ");
+            stringBuilder.Append($"Date of Birth: {DateOfBirth.ToString("yyyy-MM-dd")}, ");
+            stringBuilder.Append($"Gender: {Gender}, ");
+            stringBuilder.Append($"Country Id: {CountryId}, ");
+            stringBuilder.Append($"Country: {Country?.Name}, ");
+            stringBuilder.Append($"Address: {Address}, ");
+            stringBuilder.Append($"Receive News Letters: {ReceiveNewsLetters}, ");
+
+
+            return stringBuilder.ToString();
+        }
     }
 }

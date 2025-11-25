@@ -50,7 +50,8 @@ namespace PeopleDatabase
             }
             
             var app = builder.Build();
-            
+
+            app.UseSerilogRequestLogging();
             app.UseHttpLogging();
 
             if (builder.Environment.IsDevelopment())

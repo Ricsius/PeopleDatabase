@@ -4,6 +4,8 @@ using Entities;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 using RepositoryContracts;
+using Serilog;
+using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -17,11 +19,13 @@ namespace Services
     {
         private readonly IPeopleRepository _repository;
         private readonly ILogger<PeopleService> _logger;
+        private readonly IDiagnosticContext _diagnosticContext;
 
-        public PeopleService(IPeopleRepository repository, ILogger<PeopleService> logger)
+        public PeopleService(IPeopleRepository repository, ILogger<PeopleService> logger, IDiagnosticContext diagnosticContext)
         {
             _repository = repository;
             _logger = logger;
+            _diagnosticContext = diagnosticContext;
 
             ExcelPackage.License.SetNonCommercialPersonal("Placeholder");
         }
@@ -119,58 +123,66 @@ namespace Services
         {
             _logger.LogInformation($"{nameof(SearchPeople)} of {nameof(PeopleService)} called");
 
-            Expression<Func<Person, bool>> predicate;
+            IEnumerable<Person> foundPeople;
 
-            if (string.IsNullOrEmpty(searchBy) || string.IsNullOrEmpty(searchString))
+            using (Operation.Time("Searching people from database")) 
             {
-                predicate = p => true;
-            }
-            else
-            {
-                if (searchBy == nameof(PersonResponse.DateOfBirth)) 
+                Expression<Func<Person, bool>> predicate;
+
+                if (string.IsNullOrEmpty(searchBy) || string.IsNullOrEmpty(searchString))
                 {
-                    IEnumerable<Person> people = (await _repository.GetAllPersons()).ToArray();
-                    
-                    return people
-                        .Where(p => p.DateOfBirth.ToString("yyyy MM dd").Contains(searchString))
-                        .Select(p => p.ToPersonResponse());
+                    predicate = p => true;
+                }
+                else
+                {
+                    if (searchBy == nameof(PersonResponse.DateOfBirth))
+                    {
+                        IEnumerable<Person> people = (await _repository.GetAllPersons()).ToArray();
+
+                        return people
+                            .Where(p => p.DateOfBirth.ToString("yyyy MM dd").Contains(searchString))
+                            .Select(p => p.ToPersonResponse());
+                    }
+
+                    predicate = searchBy switch
+                    {
+                        nameof(PersonResponse.Name) =>
+                        p => !string.IsNullOrEmpty(p.Name)
+                                ? p.Name.Contains(searchString!)
+                                : false,
+
+                        nameof(PersonResponse.Email) =>
+                        p => !string.IsNullOrEmpty(p.Email)
+                            ? p.Email.Contains(searchString!)
+                            : false,
+
+                        nameof(PersonResponse.Gender) =>
+                            p => !string.IsNullOrEmpty(p.Gender)
+                                ? p.Gender.Equals(searchString!)
+                                : false,
+
+                        nameof(PersonResponse.CountryName) =>
+                            p => !string.IsNullOrEmpty(p.Country!.Name)
+                                ? p.Country.Name.Contains(searchString!)
+                                : false,
+
+                        nameof(PersonResponse.Address) =>
+                            p => !string.IsNullOrEmpty(p.Address)
+                                ? p.Address.Contains(searchString!)
+                                : false,
+
+                        _ =>
+                        p => true,
+                    };
                 }
 
-                predicate = searchBy switch
-                {
-                    nameof(PersonResponse.Name) =>
-                    p => !string.IsNullOrEmpty(p.Name)
-                            ? p.Name.Contains(searchString!)
-                            : false,
-
-                    nameof(PersonResponse.Email) =>
-                    p => !string.IsNullOrEmpty(p.Email)
-                        ? p.Email.Contains(searchString!)
-                        : false,
-
-                    nameof(PersonResponse.Gender) =>
-                        p => !string.IsNullOrEmpty(p.Gender)
-                            ? p.Gender.Equals(searchString!)
-                            : false,
-
-                    nameof(PersonResponse.CountryName) =>
-                        p => !string.IsNullOrEmpty(p.Country!.Name)
-                            ? p.Country.Name.Contains(searchString!)
-                            : false,
-
-                    nameof(PersonResponse.Address) =>
-                        p => !string.IsNullOrEmpty(p.Address)
-                            ? p.Address.Contains(searchString!)
-                            : false,
-
-                    _ =>
-                    p => true,
-                };
+                foundPeople = await _repository.SearchPeople(predicate);
             }
-
-            IEnumerable<Person> foundPeople = await _repository.SearchPeople(predicate);
+            
             IEnumerable<PersonResponse> matchingPeople = foundPeople
                     .Select(p => p.ToPersonResponse());
+
+            _diagnosticContext.Set("People", foundPeople);
 
             return matchingPeople;
         }

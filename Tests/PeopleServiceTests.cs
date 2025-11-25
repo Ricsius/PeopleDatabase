@@ -4,6 +4,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using RepositoryContracts;
+using Serilog;
 using ServiceContracts;
 using ServiceContracts.DTO;
 using ServiceContracts.Enums;
@@ -21,12 +22,13 @@ namespace Tests
         private readonly ITestOutputHelper _outputHelper;
         private readonly List<Person> _people = new List<Person>();
         private readonly Mock<ILogger<PeopleService>> loggerMock = new Mock<ILogger<PeopleService>>();
+        private readonly Mock<IDiagnosticContext> diagnosticContextMock = new Mock<IDiagnosticContext>();
 
         public PeopleServiceTests(ITestOutputHelper outputHelper)
         {
             IPeopleRepository mockRepository = TestHelper.CreateMockPeopleRepository(_people);
 
-            _peopleService = new PeopleService(mockRepository, loggerMock.Object);
+            _peopleService = new PeopleService(mockRepository, loggerMock.Object, diagnosticContextMock.Object);
             _outputHelper = outputHelper;
             _fixture = new Fixture();
 

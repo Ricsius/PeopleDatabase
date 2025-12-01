@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using PeopleDatabase.Filters.ActionFilters;
 using Rotativa.AspNetCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
@@ -23,6 +24,7 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]")]
         [Route("/")]
+        [TypeFilter(typeof(PeopleListActionFilter))]
         public async Task<IActionResult> Index(
             string? searchBy,
             string? searchString,
@@ -44,13 +46,7 @@ namespace PeopleDatabase.Controllers
 
             IEnumerable<PersonResponse> people = await _peopleService.SearchPeople(searchBy, searchString);
 
-            ViewBag.SearchBy = searchBy;
-            ViewBag.SearchString = searchString;
-
             people = await _peopleService.GetSortedPeople(people, sortby, sortOrder);
-
-            ViewBag.SortBy = sortby;
-            ViewBag.SortOrder = sortOrder.ToString();
 
             return View(people);
         }

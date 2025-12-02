@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 using Repositories;
 using Serilog;
+using PeopleDatabase.Filters.ActionFilters;
 
 namespace PeopleDatabase
 {
@@ -30,7 +31,11 @@ namespace PeopleDatabase
                 .ReadFrom.Services(serviceProvider);
             });
 
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews(options => 
+            {
+                ILogger<ResponseHeaderActionFilter> logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<ResponseHeaderActionFilter>>();
+                options.Filters.Add(new ResponseHeaderActionFilter(logger, "MyKey_FromGlobal", "MyValue_FromGlobal"));
+            });
             builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
             builder.Services.AddScoped<IPeopleRepository, PeopleRepository>();
             builder.Services.AddScoped<ICountriesService, CountriesService>();

@@ -25,6 +25,7 @@ namespace PeopleDatabase.Controllers
         [Route("[action]")]
         [Route("/")]
         [TypeFilter(typeof(PeopleListActionFilter))]
+        [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] { "X-Custom-Key", "Custom-Value" })]
         public async Task<IActionResult> Index(
             string? searchBy,
             string? searchString,

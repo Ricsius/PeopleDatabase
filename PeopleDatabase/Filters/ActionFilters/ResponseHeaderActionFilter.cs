@@ -2,7 +2,7 @@
 
 namespace PeopleDatabase.Filters.ActionFilters
 {
-    public class ResponseHeaderActionFilter : IActionFilter, IOrderedFilter
+    public class ResponseHeaderActionFilter : IAsyncActionFilter, IOrderedFilter
     {
         private readonly ILogger<ResponseHeaderActionFilter> _logger;
         private readonly string _headerKey;
@@ -18,14 +18,14 @@ namespace PeopleDatabase.Filters.ActionFilters
             Order = order;
         }
 
-        public void OnActionExecuting(ActionExecutingContext context)
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            _logger.LogInformation("{FilterName}.{MethodName} called", nameof(ResponseHeaderActionFilter), nameof(OnActionExecuting));
-        }
+            _logger.LogInformation("{FilterName}.{MethodName} called", nameof(ResponseHeaderActionFilter), nameof(OnActionExecutionAsync));
+            _logger.LogInformation("Before calling next filter");
+            
+            await next();
 
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-            _logger.LogInformation("{FilterName}.{MethodName} called", nameof(ResponseHeaderActionFilter), nameof(OnActionExecuted));
+            _logger.LogInformation("After calling next filter");
 
             context.HttpContext.Response.Headers[_headerKey] = _headerValue;
         }

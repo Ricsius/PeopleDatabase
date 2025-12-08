@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PeopleDatabase.Filters.ActionFilters;
+using PeopleDatabase.Filters.ResultFilters;
 using Rotativa.AspNetCore;
 using ServiceContracts;
 using ServiceContracts.DTO;
@@ -31,6 +32,7 @@ namespace PeopleDatabase.Controllers
         [TypeFilter(typeof(ResponseHeaderActionFilter), 
             Arguments = new object[] { "X-Custom-Key-FromIndex", "Custom-Value-FromIndex", 3 }, 
             Order = 3)]
+        [TypeFilter(typeof(PeopleListResultFilter))]
         public async Task<IActionResult> Index(
             string? searchBy,
             string? searchString,

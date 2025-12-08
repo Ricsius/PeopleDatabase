@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using PeopleDatabase.Filters.ActionFilters;
 using Rotativa.AspNetCore;
 using ServiceContracts;
@@ -60,32 +59,20 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]")]
         [HttpGet]
+        [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
         public async Task<IActionResult> Create()
         {
             _logger.LogInformation($"{nameof(Create)} GET action of {nameof(PeopleController)}");
-
-            await CountriesDropdownSetup();
 
             return View();
         }
 
         [Route("[action]")]
         [HttpPost]
+        [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
         public async Task<IActionResult> Create(PersonAddRequest request)
         {
             _logger.LogInformation($"{nameof(Create)} POST action of {nameof(PeopleController)}");
-
-            if (!ModelState.IsValid)
-            {
-                await CountriesDropdownSetup();
-
-                ViewBag.Errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToArray();
-
-                return View(request);
-            }
 
             await _peopleService.AddPerson(request);
 
@@ -94,6 +81,7 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]/{personId}")]
         [HttpGet]
+        [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
         public async Task<IActionResult> Edit(Guid personId)
         {
             _logger.LogInformation($"{nameof(Edit)} GET action of {nameof(PeopleController)}");
@@ -107,13 +95,12 @@ namespace PeopleDatabase.Controllers
 
             PersonUpdateRequest request = response.ToPersonUpdateRequest();
 
-            await CountriesDropdownSetup();
-
             return View(request);
         }
 
         [Route("[action]/{personId}")]
         [HttpPost]
+        [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest request)
         {
             _logger.LogInformation($"{nameof(Edit)} POST action of {nameof(PeopleController)}");
@@ -123,18 +110,6 @@ namespace PeopleDatabase.Controllers
             if (personResponse == null)
             {
                 return RedirectToAction(nameof(Index));
-            }
-
-            if (!ModelState.IsValid)
-            {
-                await CountriesDropdownSetup();
-
-                ViewBag.Errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToArray();
-
-                return View(request);
             }
 
             await _peopleService.UpdatePerson(request);
@@ -218,21 +193,6 @@ namespace PeopleDatabase.Controllers
             MemoryStream stream = await _peopleService.GetPeopleExcel();
 
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "people.xlsx");
-        }
-
-        private async Task CountriesDropdownSetup()
-        {
-            IEnumerable<CountryResponse> countries = await _countriesService
-                .GetAllCountries();
-
-            IEnumerable<SelectListItem> items = countries
-                .OrderBy(c => c.CountryName)
-                .Select(c => new SelectListItem()
-                {
-                    Text = c.CountryName,
-                    Value = c.CountryId.ToString()
-                });
-            ViewBag.Countries = items;
         }
     }
 }

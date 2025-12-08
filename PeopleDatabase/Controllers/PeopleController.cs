@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using OfficeOpenXml.Attributes;
 using PeopleDatabase.Filters.ActionFilters;
 using Rotativa.AspNetCore;
 using ServiceContracts;
@@ -11,8 +10,8 @@ namespace PeopleDatabase.Controllers
 {
     [Route("[controller]")]
     [TypeFilter(typeof(ResponseHeaderActionFilter),
-            Arguments = new object[] { "X-Key-FromController", "Custom-Value-FromController" },
-            Order = 2)]
+            Arguments = new object[] { "X-Key-FromController", "Custom-Value-FromController", 1 }, 
+            Order = 1)]
     public class PeopleController : Controller
     {
         private readonly IPeopleService _peopleService;
@@ -28,10 +27,11 @@ namespace PeopleDatabase.Controllers
 
         [Route("[action]")]
         [Route("/")]
-        [TypeFilter(typeof(PeopleListActionFilter))]
+        [TypeFilter(typeof(PeopleListActionFilter), 
+            Order = 4)]
         [TypeFilter(typeof(ResponseHeaderActionFilter), 
-            Arguments = new object[] { "X-Custom-Key-FromIndex", "Custom-Value-FromIndex" },
-            Order = 1)]
+            Arguments = new object[] { "X-Custom-Key-FromIndex", "Custom-Value-FromIndex", 3 }, 
+            Order = 3)]
         public async Task<IActionResult> Index(
             string? searchBy,
             string? searchString,

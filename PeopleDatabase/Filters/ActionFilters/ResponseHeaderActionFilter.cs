@@ -2,17 +2,20 @@
 
 namespace PeopleDatabase.Filters.ActionFilters
 {
-    public class ResponseHeaderActionFilter : IActionFilter
+    public class ResponseHeaderActionFilter : IActionFilter, IOrderedFilter
     {
         private readonly ILogger<ResponseHeaderActionFilter> _logger;
         private readonly string _headerKey;
         private readonly string _headerValue;
 
-        public ResponseHeaderActionFilter(ILogger<ResponseHeaderActionFilter> logger, string headerKey, string headerValue)
+        public int Order { get; set; }
+
+        public ResponseHeaderActionFilter(ILogger<ResponseHeaderActionFilter> logger, string headerKey, string headerValue, int order)
         {
             _logger = logger;
             _headerKey = headerKey;
             _headerValue = headerValue;
+            Order = order;
         }
 
         public void OnActionExecuting(ActionExecutingContext context)

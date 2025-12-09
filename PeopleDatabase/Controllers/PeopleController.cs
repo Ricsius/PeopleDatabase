@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PeopleDatabase.Filters.ActionFilters;
+using PeopleDatabase.Filters.AuthorizationFilters;
 using PeopleDatabase.Filters.ResourceFilters;
 using PeopleDatabase.Filters.ResultFilters;
 using Rotativa.AspNetCore;
@@ -86,6 +87,7 @@ namespace PeopleDatabase.Controllers
         [Route("[action]/{personId}")]
         [HttpGet]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [TypeFilter(typeof(TokenResultFilter))]
         public async Task<IActionResult> Edit(Guid personId)
         {
             _logger.LogInformation($"{nameof(Edit)} GET action of {nameof(PeopleController)}");
@@ -105,6 +107,7 @@ namespace PeopleDatabase.Controllers
         [Route("[action]/{personId}")]
         [HttpPost]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [TypeFilter(typeof(TokenAuthorizationFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest request)
         {
             _logger.LogInformation($"{nameof(Edit)} POST action of {nameof(PeopleController)}");

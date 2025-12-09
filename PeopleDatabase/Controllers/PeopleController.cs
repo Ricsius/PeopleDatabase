@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PeopleDatabase.Filters.ActionFilters;
+using PeopleDatabase.Filters.ResourceFilters;
 using PeopleDatabase.Filters.ResultFilters;
 using Rotativa.AspNetCore;
 using ServiceContracts;
@@ -72,6 +73,7 @@ namespace PeopleDatabase.Controllers
         [Route("[action]")]
         [HttpPost]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [TypeFilter(typeof(FeatureDisabledResourceFilter), Arguments = new object[] { false })]
         public async Task<IActionResult> Create(PersonAddRequest request)
         {
             _logger.LogInformation($"{nameof(Create)} POST action of {nameof(PeopleController)}");

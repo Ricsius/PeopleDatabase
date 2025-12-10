@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PeopleDatabase.Filters.ActionFilters;
 using PeopleDatabase.Filters.AuthorizationFilters;
+using PeopleDatabase.Filters.ExceptionFilters;
 using PeopleDatabase.Filters.ResourceFilters;
 using PeopleDatabase.Filters.ResultFilters;
 using Rotativa.AspNetCore;
@@ -14,6 +15,7 @@ namespace PeopleDatabase.Controllers
     [TypeFilter(typeof(ResponseHeaderActionFilter),
             Arguments = new object[] { "X-Key-FromController", "Custom-Value-FromController", 1 }, 
             Order = 1)]
+    [TypeFilter(typeof(HandleExceptionFilter))]
     public class PeopleController : Controller
     {
         private readonly IPeopleService _peopleService;

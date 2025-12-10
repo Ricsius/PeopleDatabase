@@ -110,6 +110,7 @@ namespace PeopleDatabase.Controllers
         [HttpPost]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
         [TypeFilter(typeof(TokenAuthorizationFilter))]
+        [TypeFilter(typeof(PeopleAlwaysRunResultFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest request)
         {
             _logger.LogInformation($"{nameof(Edit)} POST action of {nameof(PeopleController)}");

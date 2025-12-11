@@ -33,8 +33,7 @@ namespace PeopleDatabase
 
             builder.Services.AddControllersWithViews(options => 
             {
-                ILogger<ResponseHeaderActionFilter> logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<ResponseHeaderActionFilter>>();
-                options.Filters.Add(new ResponseHeaderActionFilter(logger, "MyKey_FromGlobal", "MyValue_FromGlobal", 2));
+                options.Filters.Add(new ResponseHeaderActionFilter("MyKey_FromGlobal", "MyValue_FromGlobal", 2));
             });
             builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
             builder.Services.AddScoped<IPeopleRepository, PeopleRepository>();

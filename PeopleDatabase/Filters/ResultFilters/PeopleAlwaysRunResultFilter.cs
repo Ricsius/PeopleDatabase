@@ -6,11 +6,20 @@ namespace PeopleDatabase.Filters.ResultFilters
     {
         public void OnResultExecuting(ResultExecutingContext context)
         {
+            if (context.Filters.OfType<SkipFilter>().Any()) 
+            {
+                return;
+            }
+
+            context.HttpContext.Response.Cookies.Append("Always_Run", "Always");
         }
 
         public void OnResultExecuted(ResultExecutedContext context)
         {
-            context.HttpContext.Response.Cookies.Append("Always_Run", "Always");
+            if (context.Filters.OfType<SkipFilter>().Any())
+            {
+                return;
+            }
         }
     }
 }

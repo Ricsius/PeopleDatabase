@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PeopleDatabase.Filters;
 using PeopleDatabase.Filters.ActionFilters;
 using PeopleDatabase.Filters.AuthorizationFilters;
 using PeopleDatabase.Filters.ExceptionFilters;
@@ -16,6 +17,7 @@ namespace PeopleDatabase.Controllers
             Arguments = new object[] { "X-Key-FromController", "Custom-Value-FromController", 1 }, 
             Order = 1)]
     [TypeFilter(typeof(HandleExceptionFilter))]
+    [TypeFilter(typeof(PeopleAlwaysRunResultFilter))]
     public class PeopleController : Controller
     {
         private readonly IPeopleService _peopleService;
@@ -37,6 +39,7 @@ namespace PeopleDatabase.Controllers
             Arguments = new object[] { "X-Custom-Key-FromIndex", "Custom-Value-FromIndex", 3 }, 
             Order = 3)]
         [TypeFilter(typeof(PeopleListResultFilter))]
+        [TypeFilter(typeof(SkipFilter))]
         public async Task<IActionResult> Index(
             string? searchBy,
             string? searchString,
@@ -110,7 +113,6 @@ namespace PeopleDatabase.Controllers
         [HttpPost]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
         [TypeFilter(typeof(TokenAuthorizationFilter))]
-        [TypeFilter(typeof(PeopleAlwaysRunResultFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest request)
         {
             _logger.LogInformation($"{nameof(Edit)} POST action of {nameof(PeopleController)}");

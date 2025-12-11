@@ -30,10 +30,11 @@ namespace PeopleDatabase
                 .ReadFrom.Configuration(context.Configuration)
                 .ReadFrom.Services(serviceProvider);
             });
-
+            builder.Services.AddTransient<ResponseHeaderActionFilter>();
             builder.Services.AddControllersWithViews(options => 
             {
-                options.Filters.Add(new ResponseHeaderActionFilter("MyKey_FromGlobal", "MyValue_FromGlobal", 2));
+                var factory = new ResponseHeaderActionFilterFactory("MyKey_FromGlobal", "MyValue_FromGlobal", 2);
+                options.Filters.Add(factory.CreateInstance(builder.Services.BuildServiceProvider()));
             });
             builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
             builder.Services.AddScoped<IPeopleRepository, PeopleRepository>();

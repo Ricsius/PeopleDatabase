@@ -13,7 +13,7 @@ using ServiceContracts.Enums;
 namespace PeopleDatabase.Controllers
 {
     [Route("[controller]")]
-    [ResponseHeaderActionFilter("X-Key-FromController", "Custom-Value-FromController", 1)]
+    [ResponseHeaderActionFilterFactory("X-Key-FromController", "Custom-Value-FromController", 1)]
     [TypeFilter(typeof(HandleExceptionFilter))]
     [TypeFilter(typeof(PeopleAlwaysRunResultFilter))]
     public class PeopleController : Controller
@@ -33,7 +33,7 @@ namespace PeopleDatabase.Controllers
         [Route("/")]
         [TypeFilter(typeof(PeopleListActionFilter), 
             Order = 4)]
-        [ResponseHeaderActionFilter("X-Custom-Key-FromIndex", "Custom-Value-FromIndex", 3)]
+        [ResponseHeaderActionFilterFactory("X-Custom-Key-FromIndex", "Custom-Value-FromIndex", 3)]
         [TypeFilter(typeof(PeopleListResultFilter))]
         [TypeFilter(typeof(SkipFilter))]
         public async Task<IActionResult> Index(

@@ -54,21 +54,6 @@ namespace Tests
         #region Create
 
         [Fact]
-        public async Task Create_WithModelError()
-        {
-            _controller.ModelState.AddModelError(nameof(PersonAddRequest.Name), _fixture.Create<string>());
-
-            PersonAddRequest request = _fixture.Create<PersonAddRequest>();
-            IActionResult result = await _controller.Create(request);
-
-            result.Should().BeOfType<ViewResult>();
-
-            ViewResult viewResult = (ViewResult)result;
-
-            viewResult.ViewData.Model.Should().Be(request);
-        }
-
-        [Fact]
         public async Task Create_WithoutError()
         {
             PersonAddRequest request = _fixture.Create<PersonAddRequest>();

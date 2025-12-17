@@ -38,6 +38,7 @@ namespace PeopleDatabase
             }
             else 
             {
+                app.UseExceptionHandler("/Error");
                 app.UseExceptionHandlerMiddleware();
             }
 

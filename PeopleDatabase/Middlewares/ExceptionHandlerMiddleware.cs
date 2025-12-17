@@ -36,8 +36,7 @@
 
                 _logger.LogError("{ExceptionType} {ExceptionMessage}", exceptionType, exceptionMessage);
 
-                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await httpContext.Response.WriteAsync("Error occured");
+                throw;
             }
         }
     }

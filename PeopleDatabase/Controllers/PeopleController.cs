@@ -14,7 +14,7 @@ namespace PeopleDatabase.Controllers
 {
     [Route("[controller]")]
     [ResponseHeaderActionFilterFactory("X-Key-FromController", "Custom-Value-FromController", 1)]
-    [TypeFilter(typeof(HandleExceptionFilter))]
+    //[TypeFilter(typeof(HandleExceptionFilter))]
     [TypeFilter(typeof(PeopleAlwaysRunResultFilter))]
     public class PeopleController : Controller
     {

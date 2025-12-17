@@ -1,5 +1,6 @@
-using Serilog;
+using PeopleDatabase.Middlewares;
 using PeopleDatabase.StartupExtensions;
+using Serilog;
 
 namespace PeopleDatabase
 {
@@ -34,6 +35,10 @@ namespace PeopleDatabase
             if (builder.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else 
+            {
+                app.UseExceptionHandlerMiddleware();
             }
 
             if (!builder.Environment.IsEnvironment("Test"))

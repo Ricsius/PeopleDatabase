@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using Entities;
+using Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -242,17 +243,19 @@ namespace Tests
         [Fact]
         public async Task UpdatePerson_InvalidId()
         {
-            PersonUpdateRequest request = _fixture
-                .Build<PersonUpdateRequest>()
-                .With(p => p.PersonId, Guid.NewGuid())
-                .Create();
+            PersonUpdateRequest request = _validPersonAddRequests
+                .First()
+                .ToPerson()
+                .ToPersonResponse()
+                .ToPersonUpdateRequest();
+            request.PersonId = Guid.NewGuid();
 
             Func<Task> action = async () =>
             {
                 await _peopleService.UpdatePerson(request);
             };
 
-            await action.Should().ThrowAsync<ArgumentException>();
+            await action.Should().ThrowAsync<InvalidPersonIdException>();
         }
 
         [Fact]
